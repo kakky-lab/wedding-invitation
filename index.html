@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>増田和也 ・ 加藤さや香 ご結婚式 招待状</title>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&family=Parisienne&display=swap" rel="stylesheet">
+  <style>
+    *{ margin:0; padding:0; box-sizing:border-box; }
+
+    :root{
+      --tiffany: #81d8d0;
+      --tiffany-deep: #4dc0b5;
+      --tiffany-dark: #1f7a72;
+      --blush: #ffd9e6;
+      --blush-deep: #ffb8cf;
+      --cream: #fbfefd;
+      --white: #ffffff;
+      --gold: #cda85e;
+      --ink: #2c3e3d;
+      --sub: #5c7c79;
+    }
+
+    html{ scroll-behavior:smooth; }
+
+    body{
+      font-family:'M PLUS Rounded 1c', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      overflow-x: hidden;
+    }
+
+    /* ── HERO ── */
+    #hero{
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      overflow: hidden;
+      background: var(--tiffany-dark);
+    }
+
+    .hero-bg-placeholder{
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.25) 0%, transparent 45%),
+        radial-gradient(circle at 80% 75%, rgba(255,217,230,0.35) 0%, transparent 50%),
+        linear-gradient(160deg, #9be6de 0%, #4dc0b5 45%, #1f7a72 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .hero-bg-placeholder p{
+      color: rgba(255,255,255,0.55);
+      font-size: 0.78rem;
+      letter-spacing: 0.2em;
+    }
+    .hero-bg-placeholder .big-icon{ font-size: 4rem; }
+
+    .hero-overlay{
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(31,122,114,0.9) 0%, rgba(31,122,114,0.15) 55%, transparent 100%);
+    }
+
+    .hero-text{
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 3rem 2rem 4rem;
+      width: 100%;
+    }
+
+    .hero-handwriting{
+      font-family: 'Parisienne', cursive;
+      font-size: clamp(3rem, 11vw, 5.5rem);
+      color: #fff;
+      line-height: 1;
+      display: block;
+      text-shadow: 0 4px 18px rgba(0,0,0,0.15);
+    }
+
+    .hero-date{
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      color: var(--blush);
+      font-size: clamp(0.9rem, 2.6vw, 1.15rem);
+      letter-spacing: 0.5em;
+      margin: 1.1rem 0 0.7rem;
+    }
+
+    .hero-names{
+      font-size: clamp(1.3rem, 4vw, 1.9rem);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.1em;
+    }
+
+    .hero-names span{
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 0.85em;
+      color: var(--blush);
+      margin: 0 0.7rem;
+    }
+
+    .scroll-hint{
+      position: absolute;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.55);
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      animation: bounce 2s infinite;
+    }
+
+    /* ── SECTIONS ── */
+    .section{
+      padding: 4rem 1.5rem;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .section-label{
+      font-family: 'Parisienne', cursive;
+      font-size: 1.5rem;
+      color: var(--tiffany-deep);
+      margin-bottom: 0.3rem;
+    }
+
+    .section-title{
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .divider{
+      width: 46px; height: 3px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--tiffany), var(--blush-deep));
+      margin: 1rem 0 2rem;
+    }
+
+    /* ── MESSAGE ── */
+    #message{ background: var(--white); }
+
+    .message-text{
+      font-size: 0.95rem;
+      line-height: 2.2;
+      font-weight: 400;
+      color: var(--sub);
+      text-align: center;
+    }
+
+    .message-text strong{
+      display: block;
+      font-size: 1.05rem;
+      color: var(--ink);
+      margin-bottom: 1.5rem;
+      font-weight: 800;
+    }
+
+    /* ── PHOTO STRIP ── */
+    .photo-strip{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin: 3rem 0;
+    }
+
+    .photo-strip .p-item{
+      aspect-ratio: 3/4;
+      border-radius: 14px;
+      overflow: hidden;
+      background: linear-gradient(160deg, #eafaf7, var(--blush));
+      position: relative;
+    }
+
+    .photo-strip .p-item:first-child{
+      grid-column: span 2;
+      aspect-ratio: 4/3;
+    }
+
+    .photo-strip .p-item img{
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s;
+      display: none;
+    }
+
+    .photo-strip .p-item .ph{
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0.5rem;
+      color: rgba(31,122,114,0.45);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+    }
+
+    .photo-strip .p-item .ph-icon{ font-size: 2rem; opacity: 0.5; }
+
+    /* ── INFO ── */
+    #info{ background: var(--cream); }
+
+    .info-box{
+      background: var(--white);
+      border-radius: 16px;
+      padding: 1.8rem 1.6rem;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(129,216,208,0.35);
+      box-shadow: 0 6px 20px rgba(129,216,208,0.12);
+    }
+
+    .info-label{
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      color: var(--tiffany-deep);
+      margin-bottom: 0.5rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 600;
+    }
+
+    .info-main{
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .info-sub{
+      font-size: 0.85rem;
+      color: var(--sub);
+      margin-top: 0.3rem;
+      font-weight: 400;
+      line-height: 1.7;
+    }
+
+    .schedule-row{
+      display: flex;
+      align-items: baseline;
+      gap: 0.7rem;
+      padding: 0.4rem 0;
+    }
+    .schedule-time{
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--tiffany-dark);
+      min-width: 70px;
+    }
+    .schedule-label{
+      font-size: 0.88rem;
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    /* ── FORM ── */
+    #rsvp, #party{ background: var(--white); }
+    #party{ background: linear-gradient(180deg, var(--cream), var(--white)); }
+
+    .form-note{
+      font-size: 0.82rem;
+      color: var(--sub);
+      line-height: 1.9;
+      margin-bottom: 2rem;
+      font-weight: 400;
+    }
+
+    .form-note strong{ color: var(--tiffany-dark); font-weight: 800; }
+
+    .form-group{ margin-bottom: 1.7rem; }
+
+    label{
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.03em;
+    }
+
+    label .required{
+      background: var(--blush-deep);
+      color: #b23a63;
+      margin-left: 0.4rem;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 20px;
+      font-weight: 700;
+    }
+    label .optional{
+      background: rgba(129,216,208,0.18);
+      color: var(--tiffany-dark);
+      margin-left: 0.4rem;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 20px;
+      font-weight: 700;
+    }
+
+    input[type=text], input[type=email], input[type=tel], textarea{
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: 1.5px solid rgba(129,216,208,0.5);
+      border-radius: 12px;
+      background: var(--cream);
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 0.9rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+
+    input:focus, textarea:focus{
+      border-color: var(--tiffany-deep);
+      box-shadow: 0 0 0 4px rgba(129,216,208,0.18);
+    }
+
+    textarea{ resize: vertical; min-height: 100px; }
+
+    .radio-group{
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .radio-item{ flex: 1; min-width: 130px; }
+
+    .radio-item input[type=radio]{ display: none; }
+
+    .radio-item label{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.9rem;
+      border: 1.5px solid rgba(129,216,208,0.5);
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--sub);
+      transition: all 0.2s;
+      text-align: center;
+      letter-spacing: 0.03em;
+      margin-bottom: 0;
+    }
+
+    .radio-item input[type=radio]:checked + label{
+      background: linear-gradient(135deg, var(--tiffany), var(--tiffany-deep));
+      border-color: var(--tiffany-deep);
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 6px 16px rgba(77,192,181,0.35);
+    }
+
+    .bank-card{
+      background: linear-gradient(160deg, #eafaf7, #f3fffc);
+      border: 1.5px dashed var(--tiffany-deep);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      display: none;
+    }
+    .bank-card.show{ display: block; }
+
+    .bank-name{
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      color: var(--tiffany-dark);
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
+      margin-bottom: 0.9rem;
+      font-weight: 600;
+    }
+
+    .bank-row{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.55rem 0;
+      border-bottom: 1px solid rgba(31,122,114,0.1);
+    }
+    .bank-row:last-child{ border-bottom: none; }
+
+    .bank-key{ font-size: 0.78rem; color: var(--sub); }
+    .bank-val{ font-size: 0.92rem; color: var(--ink); font-weight: 800; letter-spacing: 0.04em; }
+
+    .file-upload{
+      border: 2px dashed rgba(129,216,208,0.6);
+      border-radius: 14px;
+      padding: 1.6rem 1rem;
+      text-align: center;
+      background: var(--cream);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .file-upload:hover{ border-color: var(--tiffany-deep); background: #f0fdfb; }
+    .file-upload input{ display: none; }
+    .file-upload .fu-icon{ font-size: 1.8rem; margin-bottom: 0.4rem; }
+    .file-upload .fu-text{ font-size: 0.82rem; color: var(--sub); }
+    .file-count{
+      font-size: 0.78rem;
+      color: var(--tiffany-dark);
+      margin-top: 0.6rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .file-preview{
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.4rem;
+      margin-top: 0.8rem;
+    }
+    .file-preview img{
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid rgba(129,216,208,0.4);
+    }
+
+    .submit-btn{
+      width: 100%;
+      padding: 1.1rem;
+      background: linear-gradient(135deg, var(--tiffany-deep), var(--tiffany-dark));
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      margin-top: 1.2rem;
+      transition: transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 10px 24px rgba(31,122,114,0.28);
+    }
+    .submit-btn:disabled{ opacity: 0.6; cursor: wait; }
+    .submit-btn:active{ transform: scale(0.98); }
+
+    #thanks{
+      display: none;
+      text-align: center;
+      padding: 3.5rem 2rem;
+      background: var(--white);
+    }
+    #thanks .thanks-icon{ font-size: 3rem; margin-bottom: 1rem; }
+    #thanks h2{ font-size: 1.4rem; margin-bottom: 1rem; color: var(--ink); }
+    #thanks p{ font-size: 0.9rem; color: var(--sub); line-height: 1.9; }
+
+    #error-msg{
+      display: none;
+      background: #fff0f3;
+      border: 1px solid var(--blush-deep);
+      color: #b23a63;
+      padding: 1rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    /* ── FOOTER ── */
+    footer{
+      background: var(--tiffany-dark);
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      padding: 2.8rem 1.5rem;
+      font-size: 0.74rem;
+      letter-spacing: 0.15em;
+      line-height: 2.2;
+    }
+
+    footer .footer-names{
+      font-family: 'Parisienne', cursive;
+      font-size: 1.6rem;
+      color: #fff;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    @keyframes bounce{
+      0%,100%{ transform:translateX(-50%) translateY(0); }
+      50%     { transform:translateX(-50%) translateY(8px); }
+    }
+
+    .fade-in{
+      opacity:0; transform:translateY(20px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-in.visible{ opacity:1; transform:translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<section id="hero">
+  <div class="hero-bg-placeholder">
+    <span class="big-icon">💍</span>
+    <p>ここにメイン写真を追加できます</p>
+    <p>photo1.jpg を同フォルダに置いてください</p>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-text">
+    <span class="hero-handwriting">Our Wedding</span>
+    <p class="hero-date">2026 . 11 . 22</p>
+    <p class="hero-names">増田 和也 <span>&</span> 加藤 さや香</p>
+  </div>
+  <p class="scroll-hint">▼ scroll</p>
+</section>
+
+<!-- ── MESSAGE ── -->
+<section id="message">
+  <div class="section fade-in">
+    <p class="section-label">Message</p>
+    <h2 class="section-title">ご挨拶</h2>
+    <div class="divider"></div>
+    <p class="message-text">
+      <strong>謹んでご案内申し上げます</strong>
+      この度 私たちは結婚式を挙げることとなりました<br><br>
+      日頃お世話になっております皆様に<br>
+      感謝の気持ちをお伝えしたく<br><br>
+      お忙しい中誠に恐れ入りますが<br>
+      ぜひご出席いただけますと幸いです<br><br>
+      皆様とともに<br>
+      大切な一日を過ごせることを<br>
+      心よりお待ちしております<br><br>
+      増田 和也・加藤 さや香
+    </p>
+  </div>
+</section>
+
+<!-- ── PHOTO STRIP ── -->
+<div style="padding:0 1rem; max-width:640px; margin:0 auto;">
+  <div class="photo-strip fade-in">
+    <div class="p-item">
+      <img src="photo2.jpg" alt="">
+      <div class="ph"><span class="ph-icon">📷</span><span>photo2.jpg</span></div>
+    </div>
+    <div class="p-item">
+      <img src="photo3.jpg" alt="">
+      <div class="ph"><span class="ph-icon">📷</span><span>photo3.jpg</span></div>
+    </div>
+    <div class="p-item">
+      <img src="photo4.jpg" alt="">
+      <div class="ph"><span class="ph-icon">📷</span><span>photo4.jpg</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── INFO ── -->
+<section id="info">
+  <div class="section fade-in">
+    <p class="section-label">Details</p>
+    <h2 class="section-title">式の詳細</h2>
+    <div class="divider"></div>
+
+    <div class="info-box">
+      <p class="info-label">Date & Time</p>
+      <p class="info-main">2026年11月22日（日）</p>
+      <div style="margin-top:0.8rem;">
+        <div class="schedule-row"><span class="schedule-time">10:00〜</span><span class="schedule-label">開場</span></div>
+        <div class="schedule-row"><span class="schedule-time">11:00〜</span><span class="schedule-label">挙式開始</span></div>
+        <div class="schedule-row"><span class="schedule-time">12:00〜</span><span class="schedule-label">披露宴開始</span></div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <p class="info-label">Venue</p>
+      <p class="info-main">伊勢山ヒルズ</p>
+      <p class="info-sub">〒220-0031 神奈川県横浜市西区宮崎町58-3<br>桜木町駅より徒歩約10分</p>
+    </div>
+
+    <div class="info-box">
+      <p class="info-label">Contact</p>
+      <p class="info-main">増田 和也</p>
+      <p class="info-sub">kazuya.msd.20282@gmail.com</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── RSVP FORM ── -->
+<section id="rsvp">
+  <div class="section fade-in">
+    <p class="section-label">RSVP</p>
+    <h2 class="section-title">出欠のご回答</h2>
+    <div class="divider"></div>
+    <p class="form-note">
+      大変お手数ですが、<strong>2026年9月20日（日）</strong>までにご回答をお願いいたします。
+    </p>
+
+    <form id="rsvp-form">
+
+      <div class="form-group">
+        <label>お名前<span class="required">必須</span></label>
+        <input type="text" name="name" placeholder="山田 太郎" required>
+      </div>
+
+      <div class="form-group">
+        <label>ふりがな<span class="optional">任意</span></label>
+        <input type="text" name="nameKana" placeholder="やまだ たろう">
+      </div>
+
+      <div class="form-group">
+        <label>メールアドレス<span class="optional">任意</span></label>
+        <input type="email" name="email" placeholder="example@email.com">
+      </div>
+
+      <div class="form-group">
+        <label>電話番号<span class="optional">任意</span></label>
+        <input type="tel" name="tel" placeholder="090-0000-0000">
+      </div>
+
+      <div class="form-group">
+        <label>ご結婚式への参加可否<span class="required">必須</span></label>
+        <div class="radio-group">
+          <div class="radio-item">
+            <input type="radio" name="attendance" id="attend-yes" value="参加します" required>
+            <label for="attend-yes">✨ 参加します</label>
+          </div>
+          <div class="radio-item">
+            <input type="radio" name="attendance" id="attend-no" value="参加しません">
+            <label for="attend-no">🙏 参加しません</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>アレルギーの内容<span class="optional">任意</span></label>
+        <textarea name="allergy" placeholder="アレルギーがございましたらご記入ください（例：えび、そばなど）"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>ご祝儀方法<span class="optional">任意</span></label>
+        <div class="radio-group">
+          <div class="radio-item">
+            <input type="radio" name="giftMethod" id="gift-day" value="当日会場にてお渡し">
+            <label for="gift-day">🎁 当日会場にてお渡し</label>
+          </div>
+          <div class="radio-item">
+            <input type="radio" name="giftMethod" id="gift-transfer" value="事前振込">
+            <label for="gift-transfer">💳 事前振込</label>
+          </div>
+        </div>
+        <div class="bank-card" id="bank-card">
+          <p class="bank-name">Bank Transfer</p>
+          <div class="bank-row"><span class="bank-key">銀行名</span><span class="bank-val">みずほ銀行</span></div>
+          <div class="bank-row"><span class="bank-key">支店名</span><span class="bank-val">本郷支店</span></div>
+          <div class="bank-row"><span class="bank-key">口座種別</span><span class="bank-val">普通</span></div>
+          <div class="bank-row"><span class="bank-key">口座番号</span><span class="bank-val">◯◯◯◯◯◯◯</span></div>
+          <div class="bank-row"><span class="bank-key">名義人</span><span class="bank-val">マスダ カズヤ</span></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>おふたりへメッセージ<span class="optional">任意</span></label>
+        <textarea name="message" placeholder="お祝いのメッセージをどうぞ 💐"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>思い出の写真<span class="optional">任意・お一人様上限20枚</span></label>
+        <label class="file-upload" for="photo-input">
+          <input type="file" id="photo-input" accept="image/*" multiple>
+          <div class="fu-icon">📸</div>
+          <div class="fu-text">タップして写真を選択（最大20枚）</div>
+        </label>
+        <p class="file-count" id="file-count"></p>
+        <div class="file-preview" id="file-preview"></div>
+      </div>
+
+      <hr style="border:none; border-top:1px solid rgba(129,216,208,0.3); margin:2.2rem 0;">
+
+      <p class="section-label" style="font-size:1.2rem;">2nd Party</p>
+      <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:0.3rem;">二次会について</h3>
+      <p class="form-note" style="margin-top:0.6rem;">
+        会場：〇〇（現在検討中のため決まり次第あらためてご連絡いたします）
+      </p>
+
+      <div class="form-group">
+        <label>二次会への参加可否<span class="optional">任意</span></label>
+        <div class="radio-group">
+          <div class="radio-item">
+            <input type="radio" name="partyAttendance" id="party-yes" value="参加します">
+            <label for="party-yes">🎉 参加します</label>
+          </div>
+          <div class="radio-item">
+            <input type="radio" name="partyAttendance" id="party-no" value="参加しません">
+            <label for="party-no">🙏 参加しません</label>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submit-btn">回答を送信する</button>
+      <p id="error-msg">送信に失敗しました。お手数ですが時間をおいて再度お試しいただくか、増田までご連絡ください。</p>
+    </form>
+
+    <div id="thanks">
+      <p class="thanks-icon">💌</p>
+      <h2>ご回答ありがとうございます</h2>
+      <p>当日お会いできることを<br>心よりお待ちしております</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <span class="footer-names">Kazuya & Sayaka</span>
+  <p>2026.11.22 挙式・披露宴</p>
+  <p style="margin-top:0.5rem;">ご不明な点は増田までご連絡ください</p>
+</footer>
+
+<script>
+  // ▼ Google Apps Script の「ウェブアプリのURL」をデプロイ後にここへ貼り付けてください
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyG_6thziPz6ZB0Knip9EoKhBGsWNcRMkOV5ousddjXpEXR-KiPSXqEQky9-oz9YUWMJQ/exec';
+
+  const MAX_PHOTOS = 20;
+  const MAX_DIMENSION = 1600; // 送信前にこのサイズへ縮小して負荷を軽減
+  let selectedFiles = [];
+
+  // フェードイン
+  window.addEventListener('scroll', () => {
+    document.querySelectorAll('.fade-in').forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if(rect.top < window.innerHeight * 0.88) el.classList.add('visible');
+    });
+  });
+  document.querySelectorAll('.fade-in').forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if(rect.top < window.innerHeight * 0.88) el.classList.add('visible');
+  });
+
+  // ご祝儀方法：事前振込を選んだら振込先を表示
+  document.querySelectorAll('input[name="giftMethod"]').forEach(r => {
+    r.addEventListener('change', () => {
+      document.getElementById('bank-card').classList.toggle('show', r.value === '事前振込' && r.checked);
+    });
+  });
+
+  // 写真選択
+  const photoInput = document.getElementById('photo-input');
+  const fileCount = document.getElementById('file-count');
+  const filePreview = document.getElementById('file-preview');
+
+  photoInput.addEventListener('change', () => {
+    const incoming = Array.from(photoInput.files);
+    if (selectedFiles.length + incoming.length > MAX_PHOTOS) {
+      alert('お一人様の上限は20枚までです。');
+      photoInput.value = '';
+      return;
+    }
+    selectedFiles = selectedFiles.concat(incoming);
+    photoInput.value = '';
+    renderPreview();
+  });
+
+  function renderPreview() {
+    fileCount.textContent = selectedFiles.length > 0 ? `${selectedFiles.length} / ${MAX_PHOTOS} 枚選択中` : '';
+    filePreview.innerHTML = '';
+    selectedFiles.forEach(file => {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      filePreview.appendChild(img);
+    });
+  }
+
+  // 画像を縮小してBase64化（送信データ量を抑えるため）
+  function resizeAndEncode(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = (e) => { img.src = e.target.result; };
+      reader.onerror = reject;
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+          const scale = MAX_DIMENSION / Math.max(width, height);
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+        resolve({
+          name: file.name,
+          type: 'image/jpeg',
+          data: dataUrl.split(',')[1]
+        });
+      };
+      img.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // フォーム送信
+  const form = document.getElementById('rsvp-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const errorMsg = document.getElementById('error-msg');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorMsg.style.display = 'none';
+
+    if (GAS_URL === 'YOUR_GAS_WEB_APP_URL_HERE') {
+      alert('送信先（Google Apps ScriptのウェブアプリURL）が未設定です。');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '送信中…';
+
+    try {
+      const fd = new FormData(form);
+      const photos = await Promise.all(selectedFiles.map(resizeAndEncode));
+
+      const payload = {
+        name: fd.get('name') || '',
+        nameKana: fd.get('nameKana') || '',
+        email: fd.get('email') || '',
+        tel: fd.get('tel') || '',
+        attendance: fd.get('attendance') || '',
+        allergy: fd.get('allergy') || '',
+        giftMethod: fd.get('giftMethod') || '',
+        message: fd.get('message') || '',
+        partyAttendance: fd.get('partyAttendance') || '',
+        photos
+      };
+
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const result = await res.json();
+
+      if (result.result === 'success') {
+        form.style.display = 'none';
+        document.getElementById('thanks').style.display = 'block';
+        document.getElementById('thanks').scrollIntoView({ behavior: 'smooth' });
+      } else {
+        throw new Error(result.message || 'unknown error');
+      }
+    } catch (err) {
+      errorMsg.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = '回答を送信する';
+    }
+  });
+</script>
+</body>
+</html>
