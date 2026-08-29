@@ -341,6 +341,41 @@ body[data-variant="party"]    .v-both-only{ display:none !important; }
 }
 .g-dot.active{ background:var(--tiffany-dark); transform:scale(1.35); }
 
+/* ══ 写真の帯（ページ途中のアクセント） ══ */
+.photo-band{
+  position:relative; overflow:hidden;
+  min-height:56vh;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--tiffany-dark);
+}
+/* 上下に少し余分を持たせ スクロールに合わせてゆっくり動かす */
+.pb-media{
+  position:absolute; left:0; right:0; top:-12%; height:124%;
+  will-change:transform;
+}
+.pb-media img{ width:100%; height:100%; object-fit:cover; display:block; }
+.pb-overlay{
+  position:absolute; inset:0;
+  background:
+    linear-gradient(180deg, rgba(23,72,68,.34) 0%, rgba(23,72,68,.1) 30%,
+                    rgba(23,72,68,.12) 70%, rgba(23,72,68,.4) 100%),
+    radial-gradient(ellipse at 50% 50%, rgba(12,46,44,.5) 0%, rgba(12,46,44,0) 62%);
+}
+.pb-text{
+  position:relative; z-index:2; text-align:center;
+  padding:3rem 1.5rem; color:#fff;
+}
+.pb-script{
+  font-family:var(--serif-en); font-style:italic; font-weight:400;
+  font-size:clamp(1.5rem,6vw,2rem); letter-spacing:.1em;
+  color:var(--tiffany); margin-bottom:1.1rem;
+  text-shadow:0 2px 14px rgba(0,40,38,.6);
+}
+.pb-lead{
+  font-size:clamp(.95rem,3.6vw,1.05rem); line-height:2.5; letter-spacing:.16em;
+  text-shadow:0 2px 14px rgba(0,40,38,.65);
+}
+
 /* ══ 情報カード ══ */
 #info, #party-info{ background:var(--white); }
 #party-info{ background:linear-gradient(180deg, var(--tiffany-mist), var(--white)); }
@@ -570,6 +605,10 @@ footer .footer-names{
   .g-nav.prev{ left:1.5rem; }
   .g-nav.next{ right:1.5rem; }
 
+  .photo-band{ min-height:62vh; }
+  .pb-text{ padding:4rem 2rem; }
+  .pb-lead{ line-height:2.8; letter-spacing:.2em; }
+
   .info-box{ padding:2.2rem 2rem; }
   .map-frame iframe{ height:300px; }
   .link-row{ display:grid; grid-template-columns:1fr 1fr; gap:.7rem; }
@@ -586,6 +625,7 @@ footer .footer-names{
   .envelope, .open-hint, .scroll-hint{ animation:none; }
   .env-flap, .letter, .env-seal, #opening{ transition-duration:.01ms; }
   .hero-slide, .hero-slide img{ transition:none; }
+  .pb-media{ transform:none !important; }
   .g-track{ scroll-behavior:auto; }
   .fade-in{ opacity:1; transform:none; transition:none; }
 }

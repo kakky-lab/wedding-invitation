@@ -123,6 +123,30 @@ function runFadeIn(){
 window.addEventListener('scroll', runFadeIn, { passive: true });
 runFadeIn();
 
+/* ── 写真の帯：スクロールに合わせて背景をゆっくり動かす ── */
+(function initPhotoBand(){
+  const band  = document.getElementById('photo-band');
+  const media = document.getElementById('pb-media');
+  if (!band || !media) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  let ticking = false;
+  function update(){
+    ticking = false;
+    const r = band.getBoundingClientRect();
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    if (r.bottom < 0 || r.top > vh) return;          // 画面外なら何もしない
+    // 帯が画面を通り抜ける進み具合を 0〜1 で出し 背景を上下に振る
+    const p = (vh - r.top) / (vh + r.height);
+    media.style.transform = 'translate3d(0,' + ((p - 0.5) * -56).toFixed(1) + 'px,0)';
+  }
+  window.addEventListener('scroll', () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+
 /* ── 写真ギャラリー（横スクロール＋左右ボタン） ── */
 (function initGallery(){
   const track = document.getElementById('g-track');
