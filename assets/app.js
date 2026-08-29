@@ -100,6 +100,20 @@ const VARIANT = document.body.dataset.variant || 'both';   // both | ceremony | 
   opening.addEventListener('click', open);   // 封筒の外をタップしても開く
 })();
 
+/* ── トップの写真をゆっくり切り替える ── */
+(function initHero(){
+  const slides = document.querySelectorAll('#hero-media .hero-slide');
+  if (slides.length < 2) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  let i = 0;
+  setInterval(() => {
+    slides[i].classList.remove('is-active');
+    i = (i + 1) % slides.length;
+    slides[i].classList.add('is-active');
+  }, 6000);
+})();
+
 /* ── スクロールに応じたフェードイン ── */
 function runFadeIn(){
   document.querySelectorAll('.fade-in').forEach(el => {
@@ -131,7 +145,8 @@ runFadeIn();
     const s = slides[i];
     if (!s) return;
     // スライドが中央に来る位置までスクロールする
-    track.scrollTo({ left: s.offsetLeft - (track.clientWidth - s.clientWidth) / 2, behavior: 'smooth' });
+    // （なめらかに動かすかどうかは CSS の scroll-behavior にまかせる）
+    track.scrollTo({ left: s.offsetLeft - (track.clientWidth - s.clientWidth) / 2 });
   }
 
   function currentIndex(){
@@ -147,12 +162,20 @@ runFadeIn();
   function sync(){
     const i = currentIndex();
     dots.querySelectorAll('.g-dot').forEach((d, n) => d.classList.toggle('active', n === i));
-    prev.disabled = track.scrollLeft <= 2;
-    next.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - 2;
   }
 
-  prev.addEventListener('click', () => scrollToSlide(Math.max(0, currentIndex() - 1)));
-  next.addEventListener('click', () => scrollToSlide(Math.min(slides.length - 1, currentIndex() + 1)));
+  // 端まで来たら反対側へ回る
+  function step(dir){
+    const last = slides.length - 1;
+    let i = currentIndex();
+    // 右端／左端に貼り付いているときは currentIndex がずれることがあるので補正する
+    if (dir > 0 && track.scrollLeft >= track.scrollWidth - track.clientWidth - 2) i = last;
+    if (dir < 0 && track.scrollLeft <= 2) i = 0;
+    scrollToSlide((i + dir + slides.length) % slides.length);
+  }
+
+  prev.addEventListener('click', () => step(-1));
+  next.addEventListener('click', () => step(1));
   track.addEventListener('scroll', () => { clearTimeout(track._t); track._t = setTimeout(sync, 90); }, { passive: true });
   window.addEventListener('resize', sync);
   sync();
