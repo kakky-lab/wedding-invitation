@@ -473,15 +473,12 @@ textarea{ resize:vertical; min-height:104px; }
 .bank-card{
   background:linear-gradient(160deg, #eafaf7, #f4fffc);
   border:1.5px dashed var(--tiffany-deep); border-radius:12px;
-  padding:1.5rem; margin-top:1rem;
+  padding:1.5rem; margin-top:1rem; display:none;
 }
+.bank-card.show{ display:block; }
 .bank-name{
   font-family:var(--serif-en); font-style:italic; font-weight:600;
   color:var(--tiffany-dark); font-size:.85rem; letter-spacing:.18em; margin-bottom:1rem;
-}
-.bank-lead{
-  font-size:.78rem; color:var(--sub); line-height:1.8;
-  margin:-.55rem 0 .9rem;
 }
 .bank-row{
   display:flex; justify-content:space-between; align-items:center; gap:1rem;

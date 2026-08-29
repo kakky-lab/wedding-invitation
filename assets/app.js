@@ -181,6 +181,14 @@ runFadeIn();
   sync();
 })();
 
+/* ── お支払い方法：事前振込を選んだら振込先を表示 ── */
+document.querySelectorAll('input[name="giftMethod"]').forEach(r => {
+  r.addEventListener('change', () => {
+    const card = document.getElementById('bank-card');
+    if (card) card.classList.toggle('show', r.value === '事前振込' && r.checked);
+  });
+});
+
 /* ── 思い出の写真 ── */
 const photoInput  = document.getElementById('photo-input');
 const fileCount   = document.getElementById('file-count');
@@ -277,6 +285,7 @@ function restoreDraft(form){
       fields.forEach(f => {
         if (f.disabled || f.value !== value) return;
         f.checked = true;
+        // 振込先の表示などを連動させる
         f.dispatchEvent(new Event('change', { bubbles: true }));
         restored = true;
       });
@@ -305,6 +314,7 @@ function restoreDraft(form){
     clearDraft();
     selectedFiles = [];
     renderPreview();
+    document.getElementById('bank-card').classList.remove('show');
     if (note) note.classList.remove('show');
   });
 
