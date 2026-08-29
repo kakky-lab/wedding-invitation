@@ -413,6 +413,21 @@ body[data-variant="party"]    .v-both-only{ display:none !important; }
 .form-note strong{ color:var(--tiffany-dark); font-weight:600; }
 .form-group{ margin-bottom:1.8rem; }
 
+/* 入力の下書きを復元したときのお知らせ */
+.draft-note{
+  display:none; align-items:center; gap:.4rem 1rem; flex-wrap:wrap;
+  margin:-1.2rem 0 1.9rem; padding:.75rem .95rem;
+  background:var(--tiffany-mist); border:1px solid rgba(129,216,208,.55);
+  border-radius:10px; font-size:.78rem; color:var(--tiffany-dark); line-height:1.7;
+}
+.draft-note.show{ display:flex; }
+.draft-note button{
+  border:none; background:none; padding:0; cursor:pointer;
+  font-family:var(--serif-jp); font-size:.78rem; color:var(--sub);
+  text-decoration:underline; text-underline-offset:3px;
+}
+.draft-note button:hover{ color:var(--tiffany-dark); }
+
 label{
   display:block; font-size:.85rem; font-weight:600; color:var(--ink);
   margin-bottom:.55rem; letter-spacing:.06em;

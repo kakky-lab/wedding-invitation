@@ -243,12 +243,86 @@ function resizeAndEncode(file){
   });
 }
 
+/* ── 入力途中の内容を端末に保存しておく ──
+   ページを閉じたり更新したりしても続きから入力できるようにする。
+   保存先はゲスト自身のブラウザで 送信が終わったら消す。
+   写真は容量が大きいので保存しない。 */
+const DRAFT_KEY = 'wedding-rsvp-draft-' + VARIANT;
+const DRAFT_MAX_AGE = 1000 * 60 * 60 * 24 * 90;   // 90日で破棄
+
+function saveDraft(form){
+  try {
+    const data = {};
+    // FormData は disabled の項目を含まないので バージョンごとの項目だけが入る
+    new FormData(form).forEach((v, k) => { if (typeof v === 'string' && v !== '') data[k] = v; });
+    if (Object.keys(data).length === 0) { localStorage.removeItem(DRAFT_KEY); return; }
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ t: Date.now(), data }));
+  } catch (e) { /* 保存できない設定のブラウザでは何もしない */ }
+}
+
+function clearDraft(){
+  try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+}
+
+function restoreDraft(form){
+  let saved;
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return false;
+    saved = JSON.parse(raw);
+  } catch (e) { return false; }
+
+  if (!saved || !saved.data) return false;
+  if (Date.now() - (saved.t || 0) > DRAFT_MAX_AGE) { clearDraft(); return false; }
+
+  let restored = false;
+  Object.keys(saved.data).forEach(name => {
+    const value = saved.data[name];
+    const fields = form.querySelectorAll('[name="' + name + '"]');
+    if (!fields.length) return;
+
+    if (fields[0].type === 'radio') {
+      fields.forEach(f => {
+        if (f.disabled || f.value !== value) return;
+        f.checked = true;
+        // 振込先の表示などを連動させる
+        f.dispatchEvent(new Event('change', { bubbles: true }));
+        restored = true;
+      });
+    } else if (!fields[0].disabled) {
+      fields[0].value = value;
+      restored = true;
+    }
+  });
+  return restored;
+}
+
 /* ── 送信 ── */
 (function initForm(){
   const form = document.getElementById('rsvp-form');
   if (!form) return;
   const submitBtn = document.getElementById('submit-btn');
   const errorMsg  = document.getElementById('error-msg');
+
+  // 前回の続きから
+  const note = document.getElementById('draft-note');
+  if (restoreDraft(form) && note) note.classList.add('show');
+
+  const clearBtn = document.getElementById('draft-clear');
+  if (clearBtn) clearBtn.addEventListener('click', () => {
+    form.reset();
+    clearDraft();
+    selectedFiles = [];
+    renderPreview();
+    document.getElementById('bank-card').classList.remove('show');
+    if (note) note.classList.remove('show');
+  });
+
+  // 入力のたびに保存する（連続入力でまとめて書き込む）
+  let saveTimer;
+  const queueSave = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => saveDraft(form), 400); };
+  form.addEventListener('input', queueSave);
+  form.addEventListener('change', queueSave);
 
   const VARIANT_LABEL = { both: '全体版', ceremony: '一次会のみ', party: '二次会のみ' };
 
@@ -282,6 +356,7 @@ function resizeAndEncode(file){
       const result = await res.json();
       if (result.result !== 'success') throw new Error(result.message || 'unknown error');
 
+      clearDraft();
       form.style.display = 'none';
       const thanks = document.getElementById('thanks');
       thanks.style.display = 'block';
