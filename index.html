@@ -4,6 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>増田和也 ・ 加藤さや香 ご結婚式 招待状</title>
+  <meta name="description" content="増田和也・加藤さや香 結婚式のご案内 2026年11月22日（日）伊勢山ヒルズ">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="増田和也 ・ 加藤さや香 ご結婚式 招待状">
+  <meta property="og:description" content="2026年11月22日（日）伊勢山ヒルズ　ご出欠のご回答をお願いいたします">
+  <meta property="og:image" content="https://kakky-lab.github.io/wedding-invitation/images/photo1.jpg">
+  <meta name="theme-color" content="#1f7a72">
+  <link rel="preload" as="image" href="images/hero.jpg">
+  <noscript><style>
+    #opening{ display:none !important; }
+    body.letter-locked{ overflow:auto !important; height:auto !important; }
+  </style></noscript>
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&family=Parisienne&display=swap" rel="stylesheet">
   <style>
     *{ margin:0; padding:0; box-sizing:border-box; }
@@ -30,9 +41,234 @@
       overflow-x: hidden;
     }
 
+    /* 手紙演出中は本編をスクロールさせない */
+    body.letter-locked{ overflow: hidden; height: 100vh; }
+
+    /* ══════════════════════════════════════
+       封筒 → 手紙 → 招待状 のオープニング演出
+       ══════════════════════════════════════ */
+    #opening{
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 50% 35%, #ffffff 0%, #f2fbf9 45%, #dff3ef 100%);
+      transition: opacity 0.9s ease, visibility 0.9s;
+    }
+    #opening.done{ opacity: 0; visibility: hidden; pointer-events: none; }
+    .opening-inner{
+      position: relative;
+      width: min(86vw, 340px);
+    }
+
+    /* ── 封筒 ── */
+    .envelope{
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3 / 2;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      cursor: pointer;
+      z-index: 1;
+      animation: env-float 4s ease-in-out infinite;
+      border: none;
+      background: none;
+      padding: 0;
+      display: block;
+    }
+    .envelope:focus-visible{ outline: 3px solid var(--tiffany-deep); outline-offset: 12px; border-radius: 8px; }
+    .opening.opened .envelope{
+      animation: none;
+      transform: translateY(var(--drop, 0px));
+      transition: transform 1s cubic-bezier(.2,.8,.25,1) 0.55s;
+    }
+    .opening.unfolding .envelope{
+      opacity: 0;
+      transform: translateY(calc(var(--drop, 0px) + 18px));
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    /* 封筒の内側（開いたときに見える裏地） */
+    .env-lining{
+      position: absolute;
+      inset: 0;
+      border-radius: 6px;
+      overflow: hidden;
+      background: linear-gradient(165deg, #f6e4ec 0%, #f2dde7 45%, #e9f6f4 100%);
+      box-shadow: inset 0 6px 14px rgba(31,122,114,0.08);
+      z-index: 1;
+    }
+
+    /* 封筒の本体（背面） */
+    .env-body{
+      position: absolute;
+      inset: 0;
+      border-radius: 6px;
+      background: linear-gradient(150deg, #ffffff 0%, #fdf7f9 55%, #ffeef4 100%);
+      box-shadow: 0 26px 60px rgba(31,122,114,0.22);
+      z-index: 0;
+    }
+
+    /* フタ（三角） */
+    .env-flap{
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 62%;
+      background: linear-gradient(170deg, #ffffff 0%, #fdf3f7 60%, #ffe3ee 100%);
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      transform-origin: top center;
+      transform: rotateX(0deg);
+      transition: transform 0.9s cubic-bezier(.62,.02,.28,1);
+      z-index: 6;
+      box-shadow: 0 2px 6px rgba(31,122,114,0.10);
+    }
+    .opening.opened .env-flap{ transform: rotateX(180deg); z-index: 1; }
+
+    /* 封筒の前面ポケット */
+    .env-front{
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, #fffdfd 0%, #fdf5f8 50%, #ffe8f0 100%);
+      clip-path: polygon(0 100%, 0 16%, 50% 76%, 100% 16%, 100% 100%);
+      z-index: 5;
+      box-shadow: inset 0 8px 16px rgba(31,122,114,0.05);
+    }
+
+    /* 封蝋 */
+    .env-seal{
+      position: absolute;
+      top: 56%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 62px; height: 62px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 32% 28%, #e6c98a 0%, var(--gold) 45%, #a8823f 100%);
+      color: #fff8e8;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.95rem;
+      letter-spacing: 0.06em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 7;
+      box-shadow: 0 4px 12px rgba(120,90,30,0.35);
+      transition: transform 0.45s ease, opacity 0.45s ease;
+    }
+    .opening.opened .env-seal{ transform: translate(-50%,-50%) scale(0.2); opacity: 0; }
+
+    .open-hint{
+      position: absolute;
+      left: 50%;
+      bottom: -3.4rem;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      font-size: 0.76rem;
+      letter-spacing: 0.28em;
+      color: var(--tiffany-dark);
+      opacity: 0.85;
+      animation: hint-pulse 2.2s ease-in-out infinite;
+      transition: opacity 0.3s;
+    }
+    .opening.opened .open-hint{ opacity: 0; animation: none; }
+
+    /* ── 手紙 ── */
+    .letter{
+      position: absolute;
+      left: 50%;
+      bottom: 6%;
+      width: 88%;
+      transform: translate(-50%, 0) scale(0.98);
+      background: linear-gradient(175deg, #ffffff 0%, #fcfffe 100%);
+      border-radius: 4px;
+      padding: 1.6rem 1.2rem;
+      text-align: center;
+      z-index: 3;
+      opacity: 0;
+      box-shadow: 0 18px 40px rgba(31,122,114,0.18);
+      transition:
+        transform 1s cubic-bezier(.2,.8,.25,1) 0.55s,
+        opacity 0.35s ease 0.55s;
+    }
+    /* 便箋が封筒から引き出される（--lift / --lift2 は JS が画面サイズから算出） */
+    .opening.opened .letter{
+      opacity: 1;
+      transform: translate(-50%, calc(var(--lift, 90px) * -1)) scale(1);
+    }
+    /* 便箋が開いて招待状へ */
+    .opening.unfolding .letter{
+      transform: translate(-50%, calc(var(--lift2, 110px) * -1)) scale(1.08);
+      transition: transform 0.85s cubic-bezier(.3,.7,.2,1), opacity 0.6s ease;
+    }
+
+    .letter-script{
+      font-family: 'Parisienne', cursive;
+      font-size: 1.55rem;
+      color: var(--tiffany-dark);
+      line-height: 1.2;
+    }
+    .letter-rule{
+      width: 40px; height: 2px; border-radius: 2px;
+      background: linear-gradient(90deg, var(--tiffany), var(--blush-deep));
+      margin: 0.8rem auto 0.9rem;
+    }
+    .letter-names{
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: 0.08em;
+    }
+    .letter-names span{
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      color: var(--blush-deep);
+      margin: 0 0.4rem;
+    }
+    .letter-date{
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      letter-spacing: 0.34em;
+      color: var(--sub);
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+    }
+    .letter-lead{
+      font-size: 0.76rem;
+      color: var(--sub);
+      line-height: 1.9;
+      margin-top: 0.9rem;
+    }
+
+    @media (max-height: 620px){
+      .letter{ padding: 1.1rem 1rem; }
+      .letter-script{ font-size: 1.25rem; }
+      .letter-lead{ display: none; }
+      .opening-inner{ width: min(70vw, 280px); }
+    }
+
+    @keyframes env-float{
+      0%,100%{ transform: translateY(0); }
+      50%    { transform: translateY(-10px); }
+    }
+    @keyframes hint-pulse{
+      0%,100%{ opacity: 0.35; }
+      50%    { opacity: 0.9; }
+    }
+
+    /* 動きを減らす設定の方には静かに表示する */
+    @media (prefers-reduced-motion: reduce){
+      .envelope{ animation: none; }
+      .open-hint{ animation: none; }
+      .env-flap, .letter, .env-seal{ transition-duration: 0.01ms; }
+      #opening{ transition-duration: 0.01ms; }
+    }
+
     /* ── HERO ── */
     #hero{
       min-height: 100vh;
+      min-height: 100svh;
       position: relative;
       display: flex;
       flex-direction: column;
@@ -42,30 +278,21 @@
       background: var(--tiffany-dark);
     }
 
-    .hero-bg-placeholder{
+    .hero-bg{
       position: absolute;
       inset: 0;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.25) 0%, transparent 45%),
-        radial-gradient(circle at 80% 75%, rgba(255,217,230,0.35) 0%, transparent 50%),
-        linear-gradient(160deg, #9be6de 0%, #4dc0b5 45%, #1f7a72 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 1rem;
+      background-image: url('images/hero.jpg');
+      background-size: cover;
+      background-position: center 30%;
+      transform: scale(1.06);
+      transition: transform 6s ease-out;
     }
-    .hero-bg-placeholder p{
-      color: rgba(255,255,255,0.55);
-      font-size: 0.78rem;
-      letter-spacing: 0.2em;
-    }
-    .hero-bg-placeholder .big-icon{ font-size: 4rem; }
+    body.revealed .hero-bg{ transform: scale(1); }
 
     .hero-overlay{
       position: absolute;
       inset: 0;
-      background: linear-gradient(to top, rgba(31,122,114,0.9) 0%, rgba(31,122,114,0.15) 55%, transparent 100%);
+      background: linear-gradient(to top, rgba(31,122,114,0.9) 0%, rgba(31,122,114,0.4) 30%, rgba(31,122,114,0.04) 62%, transparent 100%);
     }
 
     .hero-text{
@@ -82,7 +309,7 @@
       color: #fff;
       line-height: 1;
       display: block;
-      text-shadow: 0 4px 18px rgba(0,0,0,0.15);
+      text-shadow: 0 4px 18px rgba(0,0,0,0.25);
     }
 
     .hero-date{
@@ -99,6 +326,7 @@
       font-weight: 700;
       color: #fff;
       letter-spacing: 0.1em;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.25);
     }
 
     .hero-names span{
@@ -114,10 +342,11 @@
       bottom: 1.5rem;
       left: 50%;
       transform: translateX(-50%);
-      color: rgba(255,255,255,0.55);
+      color: rgba(255,255,255,0.7);
       font-size: 0.7rem;
       letter-spacing: 0.4em;
       animation: bounce 2s infinite;
+      z-index: 2;
     }
 
     /* ── SECTIONS ── */
@@ -167,6 +396,29 @@
       font-weight: 800;
     }
 
+    .message-greeting{
+      display: block;
+      font-size: 0.88rem;
+      color: var(--sub);
+      margin-bottom: 1.6rem;
+      line-height: 2;
+    }
+
+    .message-close{
+      display: block;
+      font-size: 0.88rem;
+      color: var(--sub);
+      margin-top: 2rem;
+      line-height: 2.1;
+    }
+
+    .message-sign{
+      display: block;
+      margin-top: 0.4rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
     /* ── PHOTO STRIP ── */
     .photo-strip{
       display: grid;
@@ -183,32 +435,16 @@
       position: relative;
     }
 
-    .photo-strip .p-item:first-child{
+    .photo-strip .p-item.wide{
       grid-column: span 2;
-      aspect-ratio: 4/3;
+      aspect-ratio: 3/2;
     }
 
     .photo-strip .p-item img{
       width: 100%; height: 100%;
       object-fit: cover;
-      transition: transform 0.4s;
-      display: none;
+      display: block;
     }
-
-    .photo-strip .p-item .ph{
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 0.5rem;
-      color: rgba(31,122,114,0.45);
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-    }
-
-    .photo-strip .p-item .ph-icon{ font-size: 2rem; opacity: 0.5; }
 
     /* ── INFO ── */
     #info{ background: var(--cream); }
@@ -257,13 +493,78 @@
       font-weight: 600;
       font-size: 1.05rem;
       color: var(--tiffany-dark);
-      min-width: 70px;
+      min-width: 74px;
     }
     .schedule-label{
       font-size: 0.88rem;
       color: var(--ink);
       font-weight: 700;
     }
+    .schedule-note{
+      font-size: 0.78rem;
+      color: var(--sub);
+      line-height: 1.8;
+      margin-top: 0.7rem;
+      padding-top: 0.7rem;
+      border-top: 1px solid rgba(129,216,208,0.3);
+    }
+
+    /* 地図とアクセス */
+    .map-frame{
+      margin-top: 1rem;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(129,216,208,0.4);
+      line-height: 0;
+      background: #eef7f6;
+    }
+    .map-frame iframe{
+      width: 100%;
+      height: 230px;
+      border: 0;
+      display: block;
+    }
+
+    .link-btn{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      margin-top: 0.7rem;
+      padding: 0.8rem 1rem;
+      border-radius: 12px;
+      border: 1.5px solid rgba(129,216,208,0.6);
+      background: var(--cream);
+      color: var(--tiffany-dark);
+      font-size: 0.84rem;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .link-btn:hover{ background: #f0fdfb; border-color: var(--tiffany-deep); }
+
+    .access-list{
+      list-style: none;
+      margin-top: 0.9rem;
+    }
+    .access-list li{
+      font-size: 0.83rem;
+      color: var(--sub);
+      line-height: 1.85;
+      padding-left: 1.1rem;
+      position: relative;
+      margin-bottom: 0.5rem;
+    }
+    .access-list li::before{
+      content: '';
+      position: absolute;
+      left: 0; top: 0.72em;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--tiffany);
+    }
+    .access-list strong{ color: var(--ink); font-weight: 700; }
 
     /* ── FORM ── */
     #rsvp, #party{ background: var(--white); }
@@ -363,6 +664,10 @@
       color: #fff;
       font-weight: 800;
       box-shadow: 0 6px 16px rgba(77,192,181,0.35);
+    }
+    .radio-item input[type=radio]:focus-visible + label{
+      outline: 2px solid var(--tiffany-deep);
+      outline-offset: 2px;
     }
 
     .bank-card{
@@ -503,20 +808,39 @@
     .fade-in.visible{ opacity:1; transform:translateY(0); }
   </style>
 </head>
-<body>
+<body class="letter-locked">
+
+<!-- ══ オープニング：封筒 → 手紙 → 招待状 ══ -->
+<div id="opening" class="opening">
+  <div class="opening-inner">
+    <button type="button" class="envelope" id="envelope" aria-label="封筒を開いて招待状を見る">
+      <span class="env-body"></span>
+      <span class="env-lining"></span>
+      <span class="env-flap"></span>
+      <span class="env-front"></span>
+      <span class="env-seal">K&amp;S</span>
+    </button>
+
+    <div class="letter" id="letter">
+      <p class="letter-script">Wedding Invitation</p>
+      <div class="letter-rule"></div>
+      <p class="letter-names">増田 和也 <span>&amp;</span> 加藤 さや香</p>
+      <p class="letter-date">2026 . 11 . 22</p>
+      <p class="letter-lead">ご案内状をお届けいたします</p>
+    </div>
+
+    <p class="open-hint" id="open-hint">▲ TAP TO OPEN</p>
+  </div>
+</div>
 
 <!-- ── HERO ── -->
 <section id="hero">
-  <div class="hero-bg-placeholder">
-    <span class="big-icon">💍</span>
-    <p>ここにメイン写真を追加できます</p>
-    <p>photo1.jpg を同フォルダに置いてください</p>
-  </div>
+  <div class="hero-bg"></div>
   <div class="hero-overlay"></div>
   <div class="hero-text">
     <span class="hero-handwriting">Our Wedding</span>
     <p class="hero-date">2026 . 11 . 22</p>
-    <p class="hero-names">増田 和也 <span>&</span> 加藤 さや香</p>
+    <p class="hero-names">増田 和也 <span>&amp;</span> 加藤 さや香</p>
   </div>
   <p class="scroll-hint">▼ scroll</p>
 </section>
@@ -528,16 +852,25 @@
     <h2 class="section-title">ご挨拶</h2>
     <div class="divider"></div>
     <p class="message-text">
+      <span class="message-greeting">
+        謹啓　初秋の候<br>
+        皆様におかれましては ますますご清祥のことと<br>
+        お慶び申し上げます
+      </span>
       <strong>謹んでご案内申し上げます</strong>
-      この度 私たちは結婚式を挙げることとなりました<br><br>
+      この度 私たちは<br>結婚式を挙げることとなりました<br><br>
       日頃お世話になっております皆様に<br>
       感謝の気持ちをお伝えしたく<br><br>
-      お忙しい中誠に恐れ入りますが<br>
+      ご多用中誠に恐れ入りますが<br>
       ぜひご出席いただけますと幸いです<br><br>
       皆様とともに<br>
-      大切な一日を過ごせることを<br>
-      心よりお待ちしております<br><br>
-      増田 和也・加藤 さや香
+      たいせつな一日を過ごせることを<br>
+      心よりお待ちしております
+      <span class="message-close">
+        謹白<br>
+        2026年8月吉日
+        <span class="message-sign">増田 和也・加藤 さや香</span>
+      </span>
     </p>
   </div>
 </section>
@@ -545,17 +878,17 @@
 <!-- ── PHOTO STRIP ── -->
 <div style="padding:0 1rem; max-width:640px; margin:0 auto;">
   <div class="photo-strip fade-in">
-    <div class="p-item">
-      <img src="photo2.jpg" alt="">
-      <div class="ph"><span class="ph-icon">📷</span><span>photo2.jpg</span></div>
+    <div class="p-item wide">
+      <img src="images/photo1.jpg" alt="" loading="lazy">
     </div>
     <div class="p-item">
-      <img src="photo3.jpg" alt="">
-      <div class="ph"><span class="ph-icon">📷</span><span>photo3.jpg</span></div>
+      <img src="images/photo2.jpg" alt="" loading="lazy">
     </div>
     <div class="p-item">
-      <img src="photo4.jpg" alt="">
-      <div class="ph"><span class="ph-icon">📷</span><span>photo4.jpg</span></div>
+      <img src="images/photo3.jpg" alt="" loading="lazy">
+    </div>
+    <div class="p-item wide">
+      <img src="images/photo4.jpg" alt="" loading="lazy">
     </div>
   </div>
 </div>
@@ -563,24 +896,51 @@
 <!-- ── INFO ── -->
 <section id="info">
   <div class="section fade-in">
-    <p class="section-label">Details</p>
-    <h2 class="section-title">式の詳細</h2>
+    <p class="section-label">Schedule</p>
+    <h2 class="section-title">スケジュール</h2>
     <div class="divider"></div>
 
     <div class="info-box">
-      <p class="info-label">Date & Time</p>
+      <p class="info-label">Date &amp; Time</p>
       <p class="info-main">2026年11月22日（日）</p>
       <div style="margin-top:0.8rem;">
-        <div class="schedule-row"><span class="schedule-time">10:00〜</span><span class="schedule-label">開場</span></div>
+        <div class="schedule-row"><span class="schedule-time">10:15〜</span><span class="schedule-label">ご親族様 受付</span></div>
+        <div class="schedule-row"><span class="schedule-time">10:35〜</span><span class="schedule-label">ご来賓 受付</span></div>
         <div class="schedule-row"><span class="schedule-time">11:00〜</span><span class="schedule-label">挙式開始</span></div>
         <div class="schedule-row"><span class="schedule-time">12:00〜</span><span class="schedule-label">披露宴開始</span></div>
       </div>
+      <p class="schedule-note">
+        受付のお時間がご親族様とご来賓で異なりますのでご確認をお願いいたします
+      </p>
     </div>
 
     <div class="info-box">
       <p class="info-label">Venue</p>
       <p class="info-main">伊勢山ヒルズ</p>
-      <p class="info-sub">〒220-0031 神奈川県横浜市西区宮崎町58-3<br>桜木町駅より徒歩約10分</p>
+      <p class="info-sub">〒220-0031<br>神奈川県横浜市西区宮崎町58-3<br>TEL 045-260-0082</p>
+
+      <div class="map-frame">
+        <iframe
+          src="https://maps.google.com/maps?q=%E4%BC%8A%E5%8B%A2%E5%B1%B1%E3%83%92%E3%83%AB%E3%82%BA%20%E7%A5%9E%E5%A5%88%E5%B7%9D%E7%9C%8C%E6%A8%AA%E6%B5%9C%E5%B8%82%E8%A5%BF%E5%8C%BA%E5%AE%AE%E5%B4%8E%E7%94%BA58-3&amp;z=16&amp;output=embed"
+          title="伊勢山ヒルズ 地図"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          allowfullscreen></iframe>
+      </div>
+
+      <a class="link-btn" href="https://www.bestbridal.co.jp/yokohama/iseyama-hills/access/" target="_blank" rel="noopener">
+        🚌 会場のアクセス案内を見る
+      </a>
+      <a class="link-btn" href="https://www.google.com/maps/search/?api=1&amp;query=%E4%BC%8A%E5%8B%A2%E5%B1%B1%E3%83%92%E3%83%AB%E3%82%BA" target="_blank" rel="noopener">
+        📍 Googleマップで開く
+      </a>
+
+      <ul class="access-list">
+        <li><strong>電車</strong> JR・市営地下鉄「桜木町駅」より無料シャトルバス</li>
+        <li><strong>シャトルバス</strong> 南改札（東口）YOKOHAMA AIR CABIN 正面の 貸切観光バス乗り場より乗車／土日祝は毎時00分から10分間隔で運行</li>
+        <li><strong>お車</strong> 首都高速神奈川1号横羽線「みなとみらい」出口より約500m 県立青少年センター前左手</li>
+        <li><strong>駐車場</strong> 台数に限りがあり事前予約制のため 公共交通機関のご利用をおすすめしております</li>
+      </ul>
     </div>
 
     <div class="info-box">
@@ -598,7 +958,7 @@
     <h2 class="section-title">出欠のご回答</h2>
     <div class="divider"></div>
     <p class="form-note">
-      大変お手数ですが、<strong>2026年9月20日（日）</strong>までにご回答をお願いいたします。
+      大変お手数ですが <strong>2026年9月20日（日）</strong> までにご回答をお願いいたします
     </p>
 
     <form id="rsvp-form">
@@ -684,11 +1044,25 @@
 
       <p class="section-label" style="font-size:1.2rem;">2nd Party</p>
       <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:0.3rem;">二次会について</h3>
-      <p class="form-note" style="margin-top:0.6rem;">
-        会場：〇〇（現在検討中のため決まり次第あらためてご連絡いたします）
-      </p>
 
-      <div class="form-group">
+      <div class="info-box" style="margin-top:1rem;">
+        <p class="info-label">Venue &amp; Time</p>
+        <p class="info-main">バビーズ ランドマークプラザ</p>
+        <p class="info-sub">2026年11月22日（日）／ビュッフェ形式（半立食スタイル）</p>
+        <div style="margin-top:0.8rem;">
+          <div class="schedule-row"><span class="schedule-time">15:30〜</span><span class="schedule-label">会場入り・受付開始</span></div>
+          <div class="schedule-row"><span class="schedule-time">16:00〜</span><span class="schedule-label">開宴</span></div>
+          <div class="schedule-row"><span class="schedule-time">18:00</span><span class="schedule-label">お開き</span></div>
+        </div>
+        <a class="link-btn" href="https://kekkonshikisoudan.com/lagf/bubbys-landmark-plaza/" target="_blank" rel="noopener">
+          📍 二次会会場の詳細を見る
+        </a>
+        <p class="schedule-note">
+          お時間は現時点の予定です 変更の際はあらためてご連絡いたします
+        </p>
+      </div>
+
+      <div class="form-group" style="margin-top:1.7rem;">
         <label>二次会への参加可否<span class="optional">任意</span></label>
         <div class="radio-group">
           <div class="radio-item">
@@ -716,7 +1090,7 @@
 
 <!-- ── FOOTER ── -->
 <footer>
-  <span class="footer-names">Kazuya & Sayaka</span>
+  <span class="footer-names">Kazuya &amp; Sayaka</span>
   <p>2026.11.22 挙式・披露宴</p>
   <p style="margin-top:0.5rem;">ご不明な点は増田までご連絡ください</p>
 </footer>
@@ -729,17 +1103,95 @@
   const MAX_DIMENSION = 1600; // 送信前にこのサイズへ縮小して負荷を軽減
   let selectedFiles = [];
 
-  // フェードイン
-  window.addEventListener('scroll', () => {
+  /* ── オープニング：封筒 → 手紙 → 招待状 ── */
+  (function initOpening(){
+    const opening = document.getElementById('opening');
+    const envelope = document.getElementById('envelope');
+    if (!opening || !envelope) return;
+
+    const inner = opening.querySelector('.opening-inner');
+    const letter = document.getElementById('letter');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let opened = false;
+
+    function viewportH(){
+      return (window.visualViewport && window.visualViewport.height)
+          || document.documentElement.clientHeight
+          || window.innerHeight
+          || 0;
+    }
+
+    // 便箋を上へ（lift）／封筒を下へ（drop）動かす量を画面の高さから求める。
+    // 便箋を少しだけ封筒に挿したまま 全体が画面中央に収まるようにしている。
+    function measureTravel(){
+      const vh = viewportH();
+      if (!vh) return;
+
+      const box = inner.getBoundingClientRect();
+      const H = box.height;
+      const Lh = letter.offsetHeight;
+      if (!H || !Lh) return;
+
+      const base = H * 0.06;                      // .letter の bottom:6%
+      const overlap = Math.min(40, H * 0.18);     // 封筒に残す差し込み分
+
+      const sum  = H - base - overlap;                    // lift + drop
+      const diff = vh - 2 * box.bottom + base + Lh;       // drop - lift
+      let lift = Math.max(0, (sum - diff) / 2);
+      let drop = Math.max(0, (sum + diff) / 2);
+
+      // 便箋が画面からはみ出さないところで止める
+      const maxLift = Math.max(0, (box.bottom - base) - Lh - 8);
+      lift = Math.min(lift, maxLift);
+
+      // 開いたあとは便箋を画面中央へ
+      const lift2 = Math.min(
+        maxLift,
+        Math.max(lift, (box.bottom - base) - Lh / 2 - vh / 2)
+      );
+
+      letter.style.setProperty('--lift', lift + 'px');
+      letter.style.setProperty('--lift2', lift2 + 'px');
+      inner.style.setProperty('--drop', drop + 'px');
+    }
+    measureTravel();
+    window.addEventListener('resize', () => { if (!opened) measureTravel(); });
+
+    function reveal(){
+      opening.classList.add('done');
+      document.body.classList.remove('letter-locked');
+      document.body.classList.add('revealed');
+      runFadeIn();
+      // 演出後は封筒を DOM 上からも無効化しておく
+      setTimeout(() => { opening.style.display = 'none'; }, 1000);
+    }
+
+    function open(){
+      if (opened) return;
+      opened = true;
+
+      if (reduced) { reveal(); return; }
+
+      measureTravel();
+      opening.classList.add('opened');           // フタが開き 手紙が出てくる
+      setTimeout(() => opening.classList.add('unfolding'), 1650); // 手紙が開く
+      setTimeout(reveal, 2450);                  // 招待状へ
+    }
+
+    envelope.addEventListener('click', open);
+    // 封筒以外をタップしても開くようにしておく
+    opening.addEventListener('click', open);
+  })();
+
+  /* ── フェードイン ── */
+  function runFadeIn(){
     document.querySelectorAll('.fade-in').forEach(el => {
       const rect = el.getBoundingClientRect();
       if(rect.top < window.innerHeight * 0.88) el.classList.add('visible');
     });
-  });
-  document.querySelectorAll('.fade-in').forEach(el => {
-    const rect = el.getBoundingClientRect();
-    if(rect.top < window.innerHeight * 0.88) el.classList.add('visible');
-  });
+  }
+  window.addEventListener('scroll', runFadeIn);
+  runFadeIn();
 
   // ご祝儀方法：事前振込を選んだら振込先を表示
   document.querySelectorAll('input[name="giftMethod"]').forEach(r => {
