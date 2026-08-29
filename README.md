@@ -19,6 +19,8 @@ python3 build.py
 ```
 
 `ceremony/` と `party/` の中身は build.py が自動生成するので、直接編集しないでください。
+build.py は CSS/JS の参照URLに版番号も付け直します。これをやらないと、
+一度サイトを開いたことがあるゲストのブラウザが古いファイルを使い続けてしまいます。
 
 - 文章・写真の並び → `index.html`
 - 見た目・配色 → `assets/style.css`

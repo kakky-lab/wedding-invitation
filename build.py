@@ -7,10 +7,26 @@ index.html（全体版）から 一次会のみ / 二次会のみ の2バージ�
 index.html だけを編集すれば 3バージョンすべてに反映される。
 サブフォルダへ置くため assets/ と images/ の参照を ../ に書き換えている。
 """
-import re, pathlib
+import re, pathlib, hashlib
 
 ROOT = pathlib.Path(__file__).parent
 SRC  = ROOT / 'index.html'
+
+
+def asset_version():
+    """CSS/JS の中身から版番号を作る。
+    直したのに古いままになる（ブラウザのキャッシュ）のを防ぐため
+    ファイルを変えたら参照URLも自動で変わるようにしている。"""
+    h = hashlib.md5()
+    for name in ('assets/style.css', 'assets/app.js'):
+        h.update((ROOT / name).read_bytes())
+    return h.hexdigest()[:8]
+
+
+def stamp(html, version):
+    html = re.sub(r'(assets/style\.css)(\?v=[0-9a-f]+)?', rf'\1?v={version}', html)
+    html = re.sub(r'(assets/app\.js)(\?v=[0-9a-f]+)?',   rf'\1?v={version}', html)
+    return html
 
 VARIANTS = {
     'ceremony': {
@@ -25,13 +41,14 @@ VARIANTS = {
     },
 }
 
-def build(name, meta):
+def build(name, meta, version):
     html = SRC.read_text(encoding='utf-8')
     html = html.replace('data-variant="both"', f'data-variant="{name}"')
     # サブフォルダから見た相対パスへ
     html = html.replace('href="assets/', 'href="../assets/')
     html = html.replace('src="assets/',  'src="../assets/')
     html = html.replace('src="images/',  'src="../images/')
+    html = stamp(html, version)
     # メタ情報
     html = re.sub(r'<title>.*?</title>', f'<title>{meta["title"]}</title>', html, count=1)
     html = re.sub(r'(<meta name="description" content=")[^"]*(")', rf'\g<1>{meta["desc"]}\g<2>', html, count=1)
@@ -44,5 +61,12 @@ def build(name, meta):
     print(f'{name}/index.html  ({len(html)} chars)')
 
 if __name__ == '__main__':
+    version = asset_version()
+
+    # 元ファイルにも版番号を付ける
+    src = SRC.read_text(encoding='utf-8')
+    SRC.write_text(stamp(src, version), encoding='utf-8')
+    print(f'index.html      (assets ?v={version})')
+
     for name, meta in VARIANTS.items():
-        build(name, meta)
+        build(name, meta, version)
