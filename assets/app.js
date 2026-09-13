@@ -9,7 +9,8 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbyG_6thziPz6ZB0Knip9EoK
 const MAX_PHOTOS = 20;
 const MAX_DIMENSION = 1600;   // 送信前にこのサイズへ縮小して負荷を軽減
 
-const VARIANT = document.body.dataset.variant || 'both';   // both | ceremony | party
+const VARIANT = document.body.dataset.variant || 'both';   // both | ceremony | party（表示の出し分け）
+const VARIANT_NAME = document.body.dataset.label || '';    // 回答に記録する招待状の名前（専用ページ用）
 
 /* ── バージョンに応じて 使わない項目を無効化する ──
    非表示のままだと未入力の必須項目でフォームが送信できなくなるため
@@ -373,7 +374,7 @@ function restoreDraft(form){
           giftMethod:      fd.get('giftMethod') || '',
           message:         fd.get('message') || '',
           partyAttendance: fd.get('partyAttendance') || '',
-          variant:         VARIANT_LABEL[VARIANT] || VARIANT,
+          variant:         VARIANT_NAME || VARIANT_LABEL[VARIANT] || VARIANT,
           photos
         })
       });

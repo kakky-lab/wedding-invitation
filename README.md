@@ -7,8 +7,11 @@
 | 一次会と二次会の両方 | https://kakky-lab.github.io/wedding-invitation/ |
 | 一次会（挙式・披露宴）のみ | https://kakky-lab.github.io/wedding-invitation/ceremony/ |
 | 二次会のみ | https://kakky-lab.github.io/wedding-invitation/party/ |
+| 元SPACE WALKERの方（一次会のみ・専用） | https://kakky-lab.github.io/wedding-invitation/spacewalker/ |
 
 回答はスプレッドシートの「招待状の種類」列に、どのバージョンから届いたかが記録されます。
+SPACE WALKER 専用ページからの回答は「SPACE WALKER（一次会のみ）」と記録され、
+回答スプレッドシートの「回答_SPACE WALKER」シートに自動で抜き出されます。
 
 ## 直すとき
 

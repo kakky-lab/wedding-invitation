@@ -28,7 +28,16 @@ def stamp(html, version):
     html = re.sub(r'(assets/app\.js)(\?v=[0-9a-f]+)?',   rf'\1?v={version}', html)
     return html
 
+# behavior: 表示の出し分け（ceremony=二次会なし / party=一次会なし）
+# label:    回答に記録する招待状の名前（省略時は behavior に応じた既定名）
 VARIANTS = {
+    'spacewalker': {
+        'behavior': 'ceremony',
+        'label': 'SPACE WALKER（一次会のみ）',
+        'title': '増田和也 ・ 加藤さや香 ご結婚式 招待状',
+        'desc':  '増田和也・加藤さや香 結婚式のご案内　2026年11月22日（日）伊勢山ヒルズ',
+        'og':    '2026年11月22日（日）伊勢山ヒルズ　ご出欠のご回答をお願いいたします',
+    },
     'ceremony': {
         'title': '増田和也 ・ 加藤さや香 ご結婚式 招待状',
         'desc':  '増田和也・加藤さや香 結婚式のご案内　2026年11月22日（日）伊勢山ヒルズ',
@@ -43,7 +52,10 @@ VARIANTS = {
 
 def build(name, meta, version):
     html = SRC.read_text(encoding='utf-8')
-    html = html.replace('data-variant="both"', f'data-variant="{name}"')
+    behavior = meta.get('behavior', name)
+    label = meta.get('label')
+    html = html.replace('data-variant="both"',
+                        f'data-variant="{behavior}"' + (f' data-label="{label}"' if label else ''))
     # サブフォルダから見た相対パスへ
     html = html.replace('href="assets/', 'href="../assets/')
     html = html.replace('src="assets/',  'src="../assets/')
