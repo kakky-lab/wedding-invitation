@@ -4,7 +4,7 @@
   python3 richmenu.py            画像だけ作る（line-setup/richmenu.png）
   python3 richmenu.py --upload   画像を作ってLINEへ登録し、既定メニューに設定する
 
-チャネルアクセストークンは環境変数 WEDDING_LINE_TOKEN から読む。
+トークンは ~/.wedding-line/token か、環境変数 WEDDING_LINE_TOKEN から読む。
 """
 import json
 import os
@@ -21,12 +21,30 @@ MINCHO = '/System/Library/Fonts/ヒラギノ明朝 ProN.ttc'
 GOTHIC = '/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc'
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'richmenu.png')
 
+TOKEN_FILE = os.path.expanduser('~/.wedding-line/token')
+
+
+def read_token():
+    """チャネルアクセストークンを ~/.wedding-line/token か環境変数から読む。"""
+    if os.path.exists(TOKEN_FILE):
+        with open(TOKEN_FILE, encoding='utf-8') as fh:
+            tok = fh.read().strip()
+        if tok:
+            return tok
+    tok = os.environ.get('WEDDING_LINE_TOKEN', '').strip()
+    if not tok:
+        raise RuntimeError(
+            'トークンが見つかりません。次のどちらかで渡してください。\n'
+            '  1) printf %s \'トークン\' > ~/.wedding-line/token\n'
+            '  2) export WEDDING_LINE_TOKEN=\'トークン\'')
+    return tok
+
 # (ラベル, 補助文, タップで送られる文字, アイコン種別)
 TILES = [
     ('お席の確認', 'あなたの卓と席番号', '席', 'seat'),
     ('当日の流れ', '受付・挙式・披露宴', '流れ', 'clock'),
     ('会場への行き方', '桜木町からシャトルバス', '行き方', 'pin'),
-    ('二次会', '15:30 受付／16:00 開宴', '二次会', 'glass'),
+    ('よくある質問', '服装・ご祝儀・持ち物', '質問', 'question'),
     ('写真・動画', '共有アルバム', '写真', 'camera'),
     ('受付（当日）', '着いたら押してください', '受付', 'check'),
 ]
@@ -64,12 +82,11 @@ def icon(d, kind, cx, cy, r, color, lw):
         d.ellipse((cx - r * .62, cy - r, cx + r * .62, cy + r * .24), outline=color, width=lw)
         d.polygon([(cx - r * .3, cy + r * .05), (cx + r * .3, cy + r * .05), (cx, cy + r)], fill=color)
         d.ellipse((cx - r * .2, cy - r * .5, cx + r * .2, cy - r * .1), outline=color, width=lw)
-    elif kind == 'glass':
-        for s in (-1, 1):
-            x = cx + s * r * .42
-            d.arc((x - r * .36, cy - r * .9, x + r * .36, cy + r * .1), 0, 180, fill=color, width=lw)
-            d.line((x, cy + r * .08, x + s * r * .2, cy + r * .82), fill=color, width=lw)
-            d.line((x + s * r * .05, cy + r * .84, x + s * r * .38, cy + r * .84), fill=color, width=lw)
+    elif kind == 'question':
+        d.ellipse(box, outline=color, width=lw)
+        d.arc((cx - r * .34, cy - r * .62, cx + r * .34, cy + r * .06), 170, 20, fill=color, width=lw)
+        d.line((cx, cy - r * .06, cx, cy + r * .24), fill=color, width=lw)
+        d.ellipse((cx - r * .07, cy + r * .44, cx + r * .07, cy + r * .58), fill=color)
     elif kind == 'camera':
         d.rounded_rectangle((cx - r, cy - r * .62, cx + r, cy + r * .72), r * .22,
                             outline=color, width=lw)
@@ -150,12 +167,7 @@ def main():
     if '--upload' not in sys.argv:
         print('LINEへ登録するには --upload を付けて実行してください。')
         return
-    token = os.environ.get('WEDDING_LINE_TOKEN', '').strip()
-    if not token:
-        print('ERROR: 環境変数 WEDDING_LINE_TOKEN にチャネルアクセストークンを入れてください',
-              file=sys.stderr)
-        sys.exit(1)
-    print('登録しました。richMenuId =', upload(path, token))
+    print('登録しました。richMenuId =', upload(path, read_token()))
     print('既定のリッチメニューに設定しました。')
 
 

@@ -5,11 +5,12 @@
   python3 broadcast.py 前日 --dry-run         送らずに宛先と本文を確認する
   python3 broadcast.py 前日 --send            実際に送る
 
-チャネルアクセストークンは環境変数 WEDDING_LINE_TOKEN から読む。
+トークンは ~/.wedding-line/token か、環境変数 WEDDING_LINE_TOKEN から読む。
 配信通数は料金プランの無料枠を消費する（応答メッセージは消費しない）。
 """
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -23,11 +24,23 @@ PLAN = os.path.join(HERE, 'messages.json')
 PLACEHOLDER = '【ここに'
 
 
-def token():
-    t = os.environ.get('WEDDING_LINE_TOKEN', '').strip()
-    if not t:
-        raise RuntimeError('環境変数 WEDDING_LINE_TOKEN にチャネルアクセストークンを入れてください')
-    return t
+TOKEN_FILE = os.path.expanduser('~/.wedding-line/token')
+
+
+def read_token():
+    """チャネルアクセストークンを ~/.wedding-line/token か環境変数から読む。"""
+    if os.path.exists(TOKEN_FILE):
+        with open(TOKEN_FILE, encoding='utf-8') as fh:
+            tok = fh.read().strip()
+        if tok:
+            return tok
+    tok = os.environ.get('WEDDING_LINE_TOKEN', '').strip()
+    if not tok:
+        raise RuntimeError(
+            'トークンが見つかりません。次のどちらかで渡してください。\n'
+            '  1) printf %s \'トークン\' > ~/.wedding-line/token\n'
+            '  2) export WEDDING_LINE_TOKEN=\'トークン\'')
+    return tok
 
 
 def load_plan():
@@ -42,16 +55,42 @@ def registry():
             for r in rows if len(r) > 2 and str(r[1]).strip()]
 
 
-def nijikai_names():
-    """招待リストで二次会が出席の人の名前（照合名も含む）を集合で返す。"""
-    out = set()
+OLD_KANJI, NEW_KANJI = '髙﨑濱邊邉瀨齋藤栁冨', '高崎浜辺辺瀬斎藤柳富'
+
+
+def norm(s):
+    """LineBot.gs の norm_ と同じ正規化。登録者名と招待リスト表記を突き合わせるため。"""
+    v = re.sub(r'[（(][^）)]*[）)]', '', str(s or ''))
+    v = re.sub(r'[\s\u3000]+', '', v)
+    v = re.sub(r'(様|さま|さん|君|くん|ちゃん|氏)$', '', v)
+    for o, n in zip(OLD_KANJI, NEW_KANJI):
+        v = v.replace(o, n)
+    return v
+
+
+def alias_map():
+    """LINE別名シートから {別名: 正式名} を正規化済みで返す。"""
+    out = {}
+    for row in gs.get(SS, 'LINE別名!A2:B200'):
+        if len(row) > 1 and row[0] and row[1]:
+            out[norm(row[0])] = norm(row[1])
+    return out
+
+
+def nijikai_keys():
+    """二次会にご招待した方の名前を、正規化キーの集合で返す。
+       招待リストはニックネーム表記のことがあるため、別名表で正式名へ寄せる。"""
+    alias = alias_map()
+    keys = set()
     for r in gs.get(SS, '招待リスト!B4:N90'):
         r = (list(r) + [''] * 13)[:13]
-        if str(r[12]).strip() == '出席':
-            for key in (r[0], r[9]):
-                if str(key).strip():
-                    out.add(str(key).strip())
-    return out
+        if str(r[12]).strip() != '出席':
+            continue
+        for raw in (r[0], r[9]):
+            k = norm(raw)
+            if k:
+                keys.add(alias.get(k, k))
+    return keys
 
 
 def recipients(target):
@@ -59,8 +98,8 @@ def recipients(target):
     if target == 'all':
         return reg
     if target == '二次会':
-        names = nijikai_names()
-        return [x for x in reg if x[1] in names]
+        keys = nijikai_keys()
+        return [x for x in reg if norm(x[1]) in keys]
     if target == '披露宴':
         return reg  # 席が引けた人＝披露宴出席者なので登録者と同じ
     raise RuntimeError('target が不正です: %s' % target)
@@ -115,7 +154,7 @@ def main():
         return
     if PLACEHOLDER in item['text']:
         raise RuntimeError('未記入の箇所があるため送信を中止しました。')
-    push([u for u, _ in people], item['text'], token())
+    push([u for u, _ in people], item['text'], read_token())
     print('✅ %d 名へ送信しました。' % len(people))
 
 

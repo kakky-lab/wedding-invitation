@@ -4,7 +4,6 @@
 
 var CFG = {
   SEAT_SHEET: '席次表2',
-  INVITE_SHEET: '招待リスト',
   REGISTRY_SHEET: 'LINE登録者',
   ALIAS_SHEET: 'LINE別名',
   UNMATCHED_SHEET: 'LINE未照合',
@@ -82,20 +81,6 @@ function aliasMap_() {
   return map;
 }
 
-/** 招待リストから二次会の出欠を {正規化名: '出席'|...} で返す。 */
-function nijikaiMap_() {
-  var sh = sheet_(CFG.INVITE_SHEET);
-  var map = {};
-  if (sh.getLastRow() < 4) return map;
-  var rows = sh.getRange(4, 2, sh.getLastRow() - 3, 13).getValues();
-  for (var i = 0; i < rows.length; i++) {
-    var nm = rows[i][0], ans = rows[i][9], nij = rows[i][12];
-    if (nm) map[norm_(nm)] = String(nij || '');
-    if (ans) map[norm_(ans)] = String(nij || '');
-  }
-  return map;
-}
-
 /** 名前から席を引く。別名も辿る。見つからなければ null。 */
 function lookupSeat_(text) {
   var key = norm_(text);
@@ -107,16 +92,16 @@ function lookupSeat_(text) {
 }
 
 function seatMessage_(seat) {
-  var nij = nijikaiMap_()[norm_(seat.name)] || '';
-  var lines = [
+  // 二次会はご案内していない方がいるため、ここでは触れない。
+  return [
     seat.name + ' 様のお席をご案内します。',
     '',
     '🪑 ' + seat.table + ' 卓（席番号 ' + seat.code + '）',
-    '受付でお名前をお伝えいただくと、係の者がご案内します。'
-  ];
-  if (nij === '出席') lines.push('', '🎉 二次会もご出席でうかがっています。会場は披露宴会場から移動します。');
-  lines.push('', '当日の流れ・会場までの行き方はこちら', CFG.HUB_URL);
-  return lines.join('\n');
+    '受付でお名前をお伝えいただくと、係の者がご案内します。',
+    '',
+    '当日の流れ・会場までの行き方はこちら',
+    CFG.HUB_URL
+  ].join('\n');
 }
 
 /** 登録者シートに userId と名前を記録する（同じ userId は上書き）。 */
@@ -163,6 +148,7 @@ var MENU = [
   '「流れ」… 当日のスケジュール',
   '「行き方」… 駅から会場までの案内',
   '「写真」… 写真・動画の共有アルバム',
+  '「質問」… 服装・ご祝儀などのよくある質問',
   '「受付」… 当日の到着のお知らせ'
 ].join('\n');
 
@@ -175,6 +161,9 @@ function routeText_(userId, text) {
     return CFG.ALBUM_URL
       ? '写真・動画はこちらの共有アルバムへどうぞ。\n' + CFG.ALBUM_URL
       : '共有アルバムは準備中です。当日までにこちらでご案内します。';
+  }
+  if (/^(質問|よくある質問|服装|ご祝儀|持ち物|ヘアセット)/.test(t)) {
+    return 'よくあるご質問をまとめています。\n' + CFG.HUB_URL + '#faq';
   }
   if (/^(受付|チェックイン|着きました|到着)/.test(t)) {
     checkin_(userId);
