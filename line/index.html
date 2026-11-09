@@ -58,6 +58,17 @@ h2 .mark{width:26px;height:1px;background:var(--tiffany);flex:none}
   border-radius:10px;padding:12px 16px;margin-top:.7rem;font-size:.92rem;text-align:left}
 .seat-box .how b{color:var(--tiffany-dark)}
 
+/* ご祝儀・お振込 */
+.bank{background:var(--white);border:1px solid var(--tiffany);border-radius:12px;padding:18px 16px}
+.bank .deadline{display:block;background:var(--tiffany-dark);color:#fff;border-radius:8px;
+  padding:9px 12px;font-size:.9rem;text-align:center;margin-bottom:.9rem;letter-spacing:.02em}
+.bank dl{display:grid;grid-template-columns:5.6em 1fr;gap:.35rem .6rem;font-size:.92rem}
+.bank dt{color:var(--sub);font-size:.85rem}
+.bank dd{font-weight:600;letter-spacing:.02em}
+.bank .copy{width:100%;margin-top:.9rem;padding:11px;border-radius:999px;border:1px solid var(--tiffany-deep);
+  background:var(--tiffany-deep);color:#fff;font-family:inherit;font-size:.88rem;cursor:pointer}
+.bank .copy.done{background:var(--white);color:var(--tiffany-dark)}
+
 /* タイムライン */
 .tl{position:relative;padding-left:20px;margin-top:.6rem}
 .tl::before{content:'';position:absolute;left:4px;top:7px;bottom:7px;width:1px;background:var(--tiffany)}
@@ -108,6 +119,7 @@ footer .names{font-family:var(--serif-en);font-style:italic;font-size:1.05rem;co
 <nav>
   <ul>
     <li><a href="#seat">お席</a></li>
+    <li><a href="#gift">ご祝儀</a></li>
     <li><a href="#schedule">当日の流れ</a></li>
     <li><a href="#access">行き方</a></li>
     <li><a href="#photo">写真</a></li>
@@ -139,6 +151,29 @@ footer .names{font-family:var(--serif-en);font-style:italic;font-size:1.05rem;co
       <li>受付でお名前をお伝えいただくと、係の者がお席までご案内します</li>
       <li>卓の番号を覚えていなくても大丈夫です</li>
     </ul>
+  </div>
+</section>
+
+<!-- ══ ご祝儀 ══ -->
+<section id="gift">
+  <h2><span class="mark"></span>ご祝儀について</h2>
+  <p class="lead">当日の受付でも、事前のお振込でもお受けしています。</p>
+
+  <div class="bank">
+    <strong class="deadline">事前にお振込の場合は 11月13日（金）中まで</strong>
+    <dl>
+      <dt>銀行名</dt><dd>みずほ銀行</dd>
+      <dt>支店名</dt><dd>本郷支店（075）</dd>
+      <dt>口座種別</dt><dd>普通預金</dd>
+      <dt>口座番号</dt><dd>4179333</dd>
+      <dt>口座名義</dt><dd>マスダ サヤカ</dd>
+    </dl>
+    <button class="copy" id="copy-bank" type="button">口座情報をコピー</button>
+    <p class="note" style="margin-top:.8rem">
+      お振込みいただいた方は、当日受付でお名前をお伝えいただくだけで結構です。
+      当日お持ちいただいても、もちろん大丈夫です。
+      お気持ちだけで十分ですので、ご無理のないようにお願いいたします。
+    </p>
   </div>
 </section>
 
@@ -222,7 +257,7 @@ footer .names{font-family:var(--serif-en);font-style:italic;font-size:1.05rem;co
     <div class="body">挙式・披露宴にふさわしい服装でお越しください。男性はスーツ、女性はワンピースやセットアップなどが一般的です。11月下旬の横浜は冷えますので、羽織るものがあると安心です。会場内にクロークがございます。</div></details>
 
   <details><summary>ご祝儀はどうすればよいですか</summary>
-    <div class="body">当日受付でお預かりしています。すでにお振込でお納めいただいた方は、受付でお名前をお伝えいただくだけで結構です。お気持ちだけで十分ですので、ご無理のないようにお願いいたします。</div></details>
+    <div class="body">当日受付でお預かりしています。事前のお振込をご希望の場合は <strong>11月13日（金）中まで</strong>に、<a href="#gift">こちらの口座</a>へお願いいたします。お振込みいただいた方は、受付でお名前をお伝えいただくだけで結構です。お気持ちだけで十分ですので、ご無理のないようにお願いいたします。</div></details>
 
   <details><summary>当日ヘアセットをしたいのですが</summary>
     <div class="body">会場近く（桜木町・みなとみらい周辺）の美容室をご案内できます。LINEのトークに「<strong>ヘアセット</strong>」とお送りください。式場内の美容室もご予約可能ですので、ご希望の方はお早めにお知らせください。</div></details>
@@ -249,5 +284,19 @@ footer .names{font-family:var(--serif-en);font-style:italic;font-size:1.05rem;co
   <p style="margin-top:.6rem">ご不明な点はこのLINEにお送りください</p>
 </footer>
 
+<script>
+(function () {
+  var btn = document.getElementById('copy-bank');
+  if (!btn || !navigator.clipboard) { if (btn) btn.style.display = 'none'; return; }
+  var text = 'みずほ銀行 本郷支店（075）普通 4179333 マスダ サヤカ';
+  btn.addEventListener('click', function () {
+    navigator.clipboard.writeText(text).then(function () {
+      btn.textContent = 'コピーしました';
+      btn.classList.add('done');
+      setTimeout(function () { btn.textContent = '口座情報をコピー'; btn.classList.remove('done'); }, 2200);
+    }).catch(function () { btn.textContent = 'コピーできませんでした'; });
+  });
+})();
+</script>
 </body>
 </html>
