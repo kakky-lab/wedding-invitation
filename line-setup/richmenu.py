@@ -45,12 +45,12 @@ HUB = 'https://kakky-lab.github.io/wedding-invitation/line/'
 #   ('uri', URL)  … そのページを開く（Webhookが無くても動く）
 #   ('msg', 文字) … その文字をトークへ送る（Webhookが要る）
 TILES = [
-    ('お席の確認', 'あなたの卓と席番号', ('uri', HUB + '#seat'), 'seat'),
-    ('当日の流れ', '受付・挙式・披露宴', ('uri', HUB + '#schedule'), 'clock'),
-    ('会場への行き方', '桜木町からシャトルバス', ('uri', HUB + '#access'), 'pin'),
-    ('ご祝儀・お振込', '事前振込は11/13まで', ('uri', HUB + '#gift'), 'gift'),
-    ('写真・動画', '共有アルバム', ('uri', HUB + '#photo'), 'camera'),
-    ('よくある質問', '服装・持ち物・アクセス', ('uri', HUB + '#faq'), 'question'),
+    ('お席の確認', '受付でのご案内', ('uri', HUB + 'seat/'), 'seat'),
+    ('当日の流れ', '受付・挙式・披露宴', ('uri', HUB + 'schedule/'), 'clock'),
+    ('会場への行き方', '桜木町からシャトルバス', ('uri', HUB + 'access/'), 'pin'),
+    ('ご祝儀・お振込', '事前振込は11/13まで', ('uri', HUB + 'gift/'), 'gift'),
+    ('写真・動画', '共有アルバム', ('uri', HUB + 'photo/'), 'camera'),
+    ('よくある質問', '服装・持ち物・お子様', ('uri', HUB + 'faq/'), 'question'),
 ]
 
 TIFFANY = (129, 216, 208)
