@@ -39,14 +39,18 @@ def read_token():
             '  2) export WEDDING_LINE_TOKEN=\'トークン\'')
     return tok
 
-# (ラベル, 補助文, タップで送られる文字, アイコン種別)
+HUB = 'https://kakky-lab.github.io/wedding-invitation/line/'
+
+# (ラベル, 補助文, タップの動作, アイコン種別)
+#   ('uri', URL)  … そのページを開く（Webhookが無くても動く）
+#   ('msg', 文字) … その文字をトークへ送る（Webhookが要る）
 TILES = [
-    ('お席の確認', 'あなたの卓と席番号', '席', 'seat'),
-    ('当日の流れ', '受付・挙式・披露宴', '流れ', 'clock'),
-    ('会場への行き方', '桜木町からシャトルバス', '行き方', 'pin'),
-    ('よくある質問', '服装・ご祝儀・持ち物', '質問', 'question'),
-    ('写真・動画', '共有アルバム', '写真', 'camera'),
-    ('受付（当日）', '着いたら押してください', '受付', 'check'),
+    ('お席の確認', 'あなたの卓と席番号', ('uri', HUB + '#seat'), 'seat'),
+    ('当日の流れ', '受付・挙式・披露宴', ('uri', HUB + '#schedule'), 'clock'),
+    ('会場への行き方', '桜木町からシャトルバス', ('uri', HUB + '#access'), 'pin'),
+    ('ご祝儀・お振込', '事前振込は11/13まで', ('uri', HUB + '#gift'), 'gift'),
+    ('写真・動画', '共有アルバム', ('uri', HUB + '#photo'), 'camera'),
+    ('よくある質問', '服装・持ち物・アクセス', ('uri', HUB + '#faq'), 'question'),
 ]
 
 TIFFANY = (129, 216, 208)
@@ -93,10 +97,12 @@ def icon(d, kind, cx, cy, r, color, lw):
         d.ellipse((cx - r * .34, cy - r * .3, cx + r * .34, cy + r * .38), outline=color, width=lw)
         d.rounded_rectangle((cx - r * .4, cy - r * .86, cx - r * .02, cy - r * .58), r * .1,
                             outline=color, width=lw)
-    elif kind == 'check':
-        d.ellipse(box, outline=color, width=lw)
-        d.line((cx - r * .42, cy + r * .04, cx - r * .08, cy + r * .4), fill=color, width=int(lw * 1.4))
-        d.line((cx - r * .08, cy + r * .4, cx + r * .46, cy - r * .36), fill=color, width=int(lw * 1.4))
+    elif kind == 'gift':
+        d.rounded_rectangle((cx - r * .62, cy - r * .86, cx + r * .62, cy + r * .86), r * .12,
+                            outline=color, width=lw)
+        d.line((cx - r * .62, cy - r * .2, cx + r * .62, cy - r * .2), fill=color, width=lw)
+        d.line((cx - r * .62, cy + r * .2, cx + r * .62, cy + r * .2), fill=color, width=lw)
+        d.line((cx, cy - r * .62, cx, cy + r * .62), fill=color, width=lw)
 
 
 def centered(d, text, font, cx, y, fill):
@@ -131,10 +137,13 @@ def draw_menu():
 def menu_body():
     tw, th = W // COLS, H // ROWS
     areas = []
-    for i, (label, _, send, _) in enumerate(TILES):
+    for i, (label, _, act, _) in enumerate(TILES):
+        kind, value = act
+        action = ({'type': 'uri', 'label': label[:20], 'uri': value} if kind == 'uri'
+                  else {'type': 'message', 'label': label[:20], 'text': value})
         areas.append({
             'bounds': {'x': (i % COLS) * tw, 'y': (i // COLS) * th, 'width': tw, 'height': th},
-            'action': {'type': 'message', 'label': label[:20], 'text': send},
+            'action': action,
         })
     return {'size': {'width': W, 'height': H}, 'selected': True,
             'name': '結婚式ゲスト用メニュー', 'chatBarText': 'メニュー', 'areas': areas}
