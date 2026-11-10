@@ -1,2 +1,8 @@
 # ゲストの氏名が載るため公開リポジトリには入れない
 line-setup/seatchart.png
+nafuda/
+
+# 手元だけで使うもの
+line-setup/profile/
+line-setup/richmenu-send.jpg
+.DS_Store

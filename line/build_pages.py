@@ -93,7 +93,36 @@ details .body{padding:0 15px 14px;font-size:.88rem;color:#3b4f4e}
 footer{text-align:center;padding:30px 16px 42px;color:var(--sub);font-size:.8rem}
 footer .names{font-family:var(--serif-en);font-style:italic;font-size:1rem;
  color:var(--tiffany-dark);margin-bottom:.35rem}
-@media (max-width:360px){.btn{min-width:100%}.more ul{grid-template-columns:1fr}}"""
+.chk{margin-top:.2rem}
+.chk .row{display:flex;gap:8px}
+.chk input{flex:1 1 auto;min-width:0;font-family:inherit;font-size:1rem;padding:11px 12px;
+ border:1px solid var(--tiffany);border-radius:10px;background:var(--white);color:var(--ink)}
+.chk input:focus{outline:2px solid var(--tiffany-deep);outline-offset:-1px}
+.chk button{flex:none;padding:11px 18px;border-radius:10px;border:1px solid var(--tiffany-deep);
+ background:var(--tiffany-deep);color:#fff;font-family:inherit;font-size:.9rem;cursor:pointer}
+.chk button:disabled{opacity:.5;cursor:default}
+.chk .out{margin-top:.8rem;border-radius:10px;padding:14px 15px;font-size:.92rem;display:none}
+.chk .out.show{display:block}
+.chk .out b{display:block;font-size:1rem;margin-bottom:.3rem}
+.chk .out small{display:block;color:var(--sub);font-size:.8rem;line-height:1.65;margin-top:.4rem}
+.chk .out.ok{background:var(--tiffany-mist);border:1px solid var(--tiffany-deep)}
+.chk .out.ok b{color:var(--tiffany-dark)}
+.chk .out.wait{background:#fffaf0;border:1px solid #e6cf9a}
+.chk .out.wait b{color:#9a7b2f}
+.chk .out.none{background:#f7f9f9;border:1px solid var(--tiffany-mist)}
+@media (max-width:360px){.btn{min-width:100%}.more ul{grid-template-columns:1fr}
+ .chk .row{flex-wrap:wrap}.chk button{width:100%}}"""
+
+SALT = 'iseyama-2026-1122'
+OLD_KANJI, NEW_KANJI = '髙﨑濱邊邉瀨齋藤栁冨', '高崎浜辺辺瀬斎藤柳富'
+HONORIFICS = ['様', 'さま', 'さん', 'くん', '君', 'ちゃん', '氏']
+
+
+# 日本語を uXXXX 形式にしてJSへ埋め込む。手で書き写すと取り違えるため。
+def js_str(text):
+    esc = chr(92) + 'u%04x'
+    return chr(39) + ''.join(esc % ord(c) for c in text) + chr(39)
+
 
 PAGES = {}
 
@@ -195,6 +224,22 @@ PAGES['gift'] = """<p class="lead">当日の受付でも、事前のお振込で
     当日お持ちいただいても、もちろん大丈夫です。
     お気持ちだけで十分ですので、ご無理のないようにお願いいたします。
   </p>
+</div>
+<div class="card chk">
+  <h3>お振込状況の確認</h3>
+  <p style="font-size:.88rem;color:var(--sub);margin-bottom:.7rem">
+    お名前を入れていただくと、こちらで確認できているかどうかが分かります。
+  </p>
+  <div class="row">
+    <input id="chk-name" type="text" inputmode="text" autocomplete="name"
+      placeholder="例）増田 和也" aria-label="お名前">
+    <button id="chk-go" type="button">確認</button>
+  </div>
+  <div class="out" id="chk-out" role="status" aria-live="polite"></div>
+  <p class="note" style="text-align:left">
+    お振込から反映までに数日いただくことがあります。
+    行き違いの際は何卒ご容赦ください。うまく出ないときはLINEのトークにお名前をお送りください。
+  </p>
 </div>"""
 
 PAGES['photo'] = """<p class="lead">当日撮っていただいた写真や動画を、ぜひ分けてください。</p>
@@ -250,6 +295,113 @@ COPY_JS = """<script>
   });
 })();
 </script>"""
+
+
+LOOKUP_JS = """<script>
+(function () {
+  var input = document.getElementById('chk-name');
+  var btn = document.getElementById('chk-go');
+  var out = document.getElementById('chk-out');
+  if (!input || !btn || !out) { return; }
+  var SALT = __SALT__;
+  var OLD = __OLD__;
+  var NEW = __NEW__;
+  var SUF = [__SUF__];
+  var table = null;
+
+  function norm(raw) {
+    var v = String(raw || ''), o = '', depth = 0, i, ch;
+    for (i = 0; i < v.length; i++) {
+      ch = v.charAt(i);
+      if (ch === '\uff08' || ch === '(') { depth++; }
+      else if (ch === '\uff09' || ch === ')') { depth = Math.max(0, depth - 1); }
+      else if (depth === 0) { o += ch; }
+    }
+    o = o.replace(/[\s\u3000]+/g, '');
+    for (i = 0; i < SUF.length; i++) {
+      if (o.length > SUF[i].length && o.slice(-SUF[i].length) === SUF[i]) {
+        o = o.slice(0, -SUF[i].length);
+        break;
+      }
+    }
+    var r = '';
+    for (i = 0; i < o.length; i++) {
+      var k = OLD.indexOf(o.charAt(i));
+      r += k < 0 ? o.charAt(i) : NEW.charAt(k);
+    }
+    return r;
+  }
+
+  function hash(name) {
+    var bytes = new TextEncoder().encode(SALT + '|' + name);
+    return crypto.subtle.digest('SHA-256', bytes).then(function (buf) {
+      var a = Array.prototype.slice.call(new Uint8Array(buf), 0, 6);
+      return a.map(function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+    });
+  }
+
+  function show(cls, title, body, note) {
+    out.className = 'out show ' + cls;
+    out.innerHTML = '<b></b><span></span>' + (note ? '<small></small>' : '');
+    out.querySelector('b').textContent = title;
+    out.querySelector('span').textContent = body;
+    if (note) { out.querySelector('small').textContent = note; }
+  }
+
+  function render(rec) {
+    if (!rec) {
+      show('none', '\u304a\u540d\u524d\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f',
+        '\u6f22\u5b57\u306e\u30d5\u30eb\u30cd\u30fc\u30e0\u3067\u3082\u3046\u4e00\u5ea6\u304a\u8a66\u3057\u304f\u3060\u3055\u3044\u3002',
+        '\u65e7\u59d3\u3084\u304a\u547c\u3073\u540d\u3067\u306f\u51fa\u306a\u3044\u3053\u3068\u304c\u3042\u308a\u307e\u3059\u3002\u304a\u624b\u6570\u3067\u3059\u304cLINE\u306e\u30c8\u30fc\u30af\u3078\u304a\u540d\u524d\u3092\u304a\u9001\u308a\u304f\u3060\u3055\u3044\u3002');
+      return;
+    }
+    if (rec.s === 1) {
+      show('ok', '\u3054\u5165\u91d1\u3092\u78ba\u8a8d\u3057\u3066\u304a\u308a\u307e\u3059',
+        '\u3042\u308a\u304c\u3068\u3046\u3054\u3056\u3044\u307e\u3059\u3002\u5f53\u65e5\u306f\u53d7\u4ed8\u3067\u304a\u540d\u524d\u3092\u304a\u4f1d\u3048\u304f\u3060\u3055\u3044\u3002'
+        + (rec.d ? '\uff08' + rec.d + '\uff09' : ''));
+    } else if (rec.s === 0) {
+      show('wait', '\u307e\u3060\u78ba\u8a8d\u3067\u304d\u3066\u304a\u308a\u307e\u305b\u3093',
+        '\u4e8b\u524d\u632f\u8fbc\u3067\u627f\u3063\u3066\u304a\u308a\u307e\u3059\u3002\u671f\u65e5\u306f 11\u670813\u65e5\uff08\u91d1\uff09\u4e2d\u307e\u3067\u3067\u3059\u3002',
+        '\u304a\u632f\u8fbc\u307f\u6e08\u307f\u306e\u5834\u5408\u306f\u884c\u304d\u9055\u3044\u304b\u3082\u3057\u308c\u307e\u305b\u3093\u3002\u6570\u65e5\u304a\u3044\u3066\u3082\u3046\u4e00\u5ea6\u3054\u78ba\u8a8d\u304f\u3060\u3055\u3044\u3002');
+    } else {
+      show('none', '\u5f53\u65e5\u53d7\u4ed8\u3067\u304a\u9810\u304b\u308a\u3057\u307e\u3059',
+        '\u4e8b\u524d\u306e\u304a\u632f\u8fbc\u307f\u306f\u627f\u3063\u3066\u304a\u308a\u307e\u305b\u3093\u3002\u304a\u6c17\u6301\u3061\u3060\u3051\u3067\u5341\u5206\u3067\u3059\u3002');
+    }
+  }
+
+  function load() {
+    if (table) { return Promise.resolve(table); }
+    return fetch('payment.json', { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) { throw new Error('status ' + r.status); }
+      return r.json();
+    }).then(function (j) { table = j.entries || {}; return table; });
+  }
+
+  function run() {
+    var name = norm(input.value);
+    if (!name) {
+      show('none', '\u304a\u540d\u524d\u3092\u5165\u308c\u3066\u304f\u3060\u3055\u3044', '');
+      return;
+    }
+    btn.disabled = true;
+    load().then(function (t) {
+      return hash(name).then(function (h) { render(t[h]); });
+    }).catch(function () {
+      show('none', '\u3046\u307e\u304f\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093\u3067\u3057\u305f',
+        '\u6642\u9593\u3092\u304a\u3044\u3066\u304a\u8a66\u3057\u304f\u3060\u3055\u3044\u3002LINE\u306e\u30c8\u30fc\u30af\u3078\u304a\u540d\u524d\u3092\u304a\u9001\u308a\u3044\u305f\u3060\u3044\u3066\u3082\u7d50\u69cb\u3067\u3059\u3002');
+    }).then(function () { btn.disabled = false; });
+  }
+
+  btn.addEventListener('click', run);
+  input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { run(); } });
+})();
+</script>"""
+
+LOOKUP_JS = (LOOKUP_JS
+             .replace('__SALT__', js_str(SALT))
+             .replace('__OLD__', js_str(OLD_KANJI))
+             .replace('__NEW__', js_str(NEW_KANJI))
+             .replace('__SUF__', ', '.join(js_str(s) for s in HONORIFICS)))
 
 
 def head(title, desc):
@@ -311,7 +463,7 @@ def build_page(key, title, body):
     html += header(title)
     html += '<div class="wrap">\n<main>\n%s\n</main>\n%s</div>\n' % (body, more_links(key))
     if key == 'gift':
-        html += COPY_JS + '\n'
+        html += COPY_JS + '\n' + LOOKUP_JS + '\n'
     return html + footer()
 
 

@@ -1,27 +1,41 @@
 #!/usr/bin/env python3
-"""公式LINEのリッチメニュー画像を作り、LINEに登録して既定メニューにする。
+"""公式LINEのリッチメニューを登録する。
 
-  python3 richmenu.py            画像だけ作る（line-setup/richmenu.png）
-  python3 richmenu.py --upload   画像を作ってLINEへ登録し、既定メニューに設定する
+  python3 line-setup/richmenu.py            送信用の画像を作って確認するだけ
+  python3 line-setup/richmenu.py --upload   LINEへ登録し、既定のメニューにする
 
+絵柄は line-setup/richmenu.png（増田さん作成）をそのまま使う。
+LINEは1MBまでなので、送る前にJPEGへ落としてから渡す。
 トークンは ~/.wedding-line/token か、環境変数 WEDDING_LINE_TOKEN から読む。
 """
+import io
 import json
 import os
 import sys
 import urllib.error
 import urllib.request
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ART = os.path.join(HERE, 'richmenu.png')
+SEND = os.path.join(HERE, 'richmenu-send.jpg')
+TOKEN_FILE = os.path.expanduser('~/.wedding-line/token')
 
 W, H = 2500, 1686
-COLS, ROWS = 3, 2
-SS = 2  # 書き出し前に縮小するための拡大率
-MINCHO = '/System/Library/Fonts/ヒラギノ明朝 ProN.ttc'
-GOTHIC = '/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc'
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'richmenu.png')
+MAX_BYTES = 950 * 1024
 
-TOKEN_FILE = os.path.expanduser('~/.wedding-line/token')
+HUB = 'https://kakky-lab.github.io/wedding-invitation/line/'
+
+# 絵柄の枠を実測した位置に合わせ、すき間も取りこぼさないよう広げてある。
+# 上段のまん中は見出し（WEDDING RECEPTION）なので、押しても何も起きない。
+TILES = [
+    ('スケジュール', 'schedule/', (0, 0, 865, 835)),
+    ('アクセス', 'access/', (1633, 0, 867, 835)),
+    ('席次表', 'seat/', (0, 835, 865, 851)),
+    ('御祝儀・お振込状況', 'gift/', (865, 835, 768, 851)),
+    ('写真＆動画共有', 'photo/', (1633, 835, 867, 851)),
+]
 
 
 def read_token():
@@ -35,115 +49,38 @@ def read_token():
     if not tok:
         raise RuntimeError(
             'トークンが見つかりません。次のどちらかで渡してください。\n'
-            '  1) printf %s \'トークン\' > ~/.wedding-line/token\n'
-            '  2) export WEDDING_LINE_TOKEN=\'トークン\'')
+            "  1) printf %s 'トークン' > ~/.wedding-line/token\n"
+            "  2) export WEDDING_LINE_TOKEN='トークン'")
     return tok
 
-HUB = 'https://kakky-lab.github.io/wedding-invitation/line/'
 
-# (ラベル, 補助文, タップの動作, アイコン種別)
-#   ('uri', URL)  … そのページを開く（Webhookが無くても動く）
-#   ('msg', 文字) … その文字をトークへ送る（Webhookが要る）
-TILES = [
-    ('お席の確認', '受付でのご案内', ('uri', HUB + 'seat/'), 'seat'),
-    ('当日の流れ', '受付・挙式・披露宴', ('uri', HUB + 'schedule/'), 'clock'),
-    ('会場への行き方', '桜木町からシャトルバス', ('uri', HUB + 'access/'), 'pin'),
-    ('ご祝儀・お振込', '事前振込は11/13まで', ('uri', HUB + 'gift/'), 'gift'),
-    ('写真・動画', '共有アルバム', ('uri', HUB + 'photo/'), 'camera'),
-    ('よくある質問', '服装・持ち物・お子様', ('uri', HUB + 'faq/'), 'question'),
-]
-
-TIFFANY = (129, 216, 208)
-DEEP = (77, 192, 181)
-DARK = (31, 122, 114)
-
-
-def gradient(size):
-    """ティファニーブルーの斜めグラデーションを作る。"""
-    w, h = size
-    img = Image.new('RGB', size)
-    px = img.load()
-    for y in range(h):
-        for x in range(0, w, 8):
-            t = (x / w * 0.55 + y / h * 0.45)
-            c = tuple(int(DEEP[i] + (DARK[i] - DEEP[i]) * t) for i in range(3))
-            for dx in range(min(8, w - x)):
-                px[x + dx, y] = c
-    return img
-
-
-def icon(d, kind, cx, cy, r, color, lw):
-    """タイルのアイコンを線画で描く。"""
-    box = (cx - r, cy - r, cx + r, cy + r)
-    if kind == 'seat':
-        d.ellipse(box, outline=color, width=lw)
-        d.ellipse((cx - r * .22, cy - r * .22, cx + r * .22, cy + r * .22), fill=color)
-    elif kind == 'clock':
-        d.ellipse(box, outline=color, width=lw)
-        d.line((cx, cy, cx, cy - r * .55), fill=color, width=lw)
-        d.line((cx, cy, cx + r * .42, cy + r * .2), fill=color, width=lw)
-    elif kind == 'pin':
-        d.ellipse((cx - r * .62, cy - r, cx + r * .62, cy + r * .24), outline=color, width=lw)
-        d.polygon([(cx - r * .3, cy + r * .05), (cx + r * .3, cy + r * .05), (cx, cy + r)], fill=color)
-        d.ellipse((cx - r * .2, cy - r * .5, cx + r * .2, cy - r * .1), outline=color, width=lw)
-    elif kind == 'question':
-        d.ellipse(box, outline=color, width=lw)
-        d.arc((cx - r * .34, cy - r * .62, cx + r * .34, cy + r * .06), 170, 20, fill=color, width=lw)
-        d.line((cx, cy - r * .06, cx, cy + r * .24), fill=color, width=lw)
-        d.ellipse((cx - r * .07, cy + r * .44, cx + r * .07, cy + r * .58), fill=color)
-    elif kind == 'camera':
-        d.rounded_rectangle((cx - r, cy - r * .62, cx + r, cy + r * .72), r * .22,
-                            outline=color, width=lw)
-        d.ellipse((cx - r * .34, cy - r * .3, cx + r * .34, cy + r * .38), outline=color, width=lw)
-        d.rounded_rectangle((cx - r * .4, cy - r * .86, cx - r * .02, cy - r * .58), r * .1,
-                            outline=color, width=lw)
-    elif kind == 'gift':
-        d.rounded_rectangle((cx - r * .62, cy - r * .86, cx + r * .62, cy + r * .86), r * .12,
-                            outline=color, width=lw)
-        d.line((cx - r * .62, cy - r * .2, cx + r * .62, cy - r * .2), fill=color, width=lw)
-        d.line((cx - r * .62, cy + r * .2, cx + r * .62, cy + r * .2), fill=color, width=lw)
-        d.line((cx, cy - r * .62, cx, cy + r * .62), fill=color, width=lw)
-
-
-def centered(d, text, font, cx, y, fill):
-    x0, y0, x1, y1 = d.textbbox((0, 0), text, font=font)
-    d.text((cx - (x1 - x0) / 2 - x0, y), text, font=font, fill=fill)
-    return y1 - y0
-
-
-def draw_menu():
-    img = gradient((W * SS, H * SS)).convert('RGB')
-    d = ImageDraw.Draw(img)
-    f_main = ImageFont.truetype(MINCHO, 76 * SS)
-    f_sub = ImageFont.truetype(GOTHIC, 40 * SS)
-    tw, th = W * SS // COLS, H * SS // ROWS
-
-    for i, (label, sub, _, kind) in enumerate(TILES):
-        cx = (i % COLS) * tw + tw // 2
-        top = (i // COLS) * th
-        icon(d, kind, cx, top + int(th * .34), int(th * .145), (255, 255, 255), 7 * SS)
-        centered(d, label, f_main, cx, top + int(th * .56), (255, 255, 255))
-        centered(d, sub, f_sub, cx, top + int(th * .745), (226, 247, 244))
-
-    for c in range(1, COLS):
-        d.line((c * tw, 0, c * tw, H * SS), fill=(255, 255, 255, 60), width=3 * SS)
-    d.line((0, th, W * SS, th), fill=(255, 255, 255, 60), width=3 * SS)
-
-    img = img.resize((W, H), Image.LANCZOS)
-    img.save(OUT, 'PNG', optimize=True)
-    return OUT
+def prepare():
+    """絵柄を2500×1686に整え、1MB未満のJPEGにして送信用に書き出す。"""
+    if not os.path.exists(ART):
+        raise RuntimeError('絵柄が見つかりません: %s' % ART)
+    img = Image.open(ART).convert('RGB')
+    if img.size != (W, H):
+        print('  %dx%d を %dx%d に合わせます' % (img.size[0], img.size[1], W, H))
+        img = img.resize((W, H), Image.LANCZOS)
+    for quality in (95, 92, 90, 88, 85, 80, 75):
+        buf = io.BytesIO()
+        img.save(buf, 'JPEG', quality=quality, optimize=True, subsampling=0)
+        if buf.tell() <= MAX_BYTES:
+            with open(SEND, 'wb') as fh:
+                fh.write(buf.getvalue())
+            print('  送信用: %s  品質%d  %.0f KB' % (
+                os.path.basename(SEND), quality, buf.tell() / 1024))
+            return SEND
+    raise RuntimeError('1MB未満にできませんでした。絵柄を見直してください。')
 
 
 def menu_body():
-    tw, th = W // COLS, H // ROWS
+    """タップ領域の定義。URLを開くだけなのでWebhookが無くても動く。"""
     areas = []
-    for i, (label, _, act, _) in enumerate(TILES):
-        kind, value = act
-        action = ({'type': 'uri', 'label': label[:20], 'uri': value} if kind == 'uri'
-                  else {'type': 'message', 'label': label[:20], 'text': value})
+    for label, path, (x, y, w, h) in TILES:
         areas.append({
-            'bounds': {'x': (i % COLS) * tw, 'y': (i // COLS) * th, 'width': tw, 'height': th},
-            'action': action,
+            'bounds': {'x': x, 'y': y, 'width': w, 'height': h},
+            'action': {'type': 'uri', 'label': label[:20], 'uri': HUB + path},
         })
     return {'size': {'width': W, 'height': H}, 'selected': True,
             'name': '結婚式ゲスト用メニュー', 'chatBarText': 'メニュー', 'areas': areas}
@@ -161,22 +98,47 @@ def api(method, url, body=None, ctype='application/json', token=None, raw=None):
         raise RuntimeError('%s %s -> %s %s' % (method, url, err.code, err.read().decode()[:400]))
 
 
+def clear_old(token, keep):
+    """古いリッチメニューを消す。残しておくと一覧が散らかるため。"""
+    try:
+        menus = api('GET', 'https://api.line.me/v2/bot/richmenu/list', token=token)
+    except RuntimeError as exc:
+        print('  古いメニューの確認に失敗しました:', exc, file=sys.stderr)
+        return 0
+    gone = 0
+    for menu in menus.get('richmenus', []):
+        rid = menu.get('richMenuId')
+        if not rid or rid == keep:
+            continue
+        try:
+            api('DELETE', 'https://api.line.me/v2/bot/richmenu/%s' % rid, token=token)
+            gone += 1
+        except RuntimeError as exc:
+            print('  %s を消せませんでした: %s' % (rid, exc), file=sys.stderr)
+    return gone
+
+
 def upload(path, token):
+    """登録して既定のメニューにし、古いものを片づける。"""
     menu = api('POST', 'https://api.line.me/v2/bot/richmenu', menu_body(), token=token)
     rid = menu['richMenuId']
-    api('POST', 'https://api-data.line.me/v2/bot/richmenu/%s/content' % rid,
-        ctype='image/png', token=token, raw=open(path, 'rb').read())
+    with open(path, 'rb') as fh:
+        api('POST', 'https://api-data.line.me/v2/bot/richmenu/%s/content' % rid,
+            ctype='image/jpeg', token=token, raw=fh.read())
     api('POST', 'https://api.line.me/v2/bot/user/all/richmenu/%s' % rid, token=token)
+    print('  古いメニューを %d 件消しました' % clear_old(token, rid))
     return rid
 
 
 def main():
-    path = draw_menu()
-    print('画像を書き出しました:', path)
+    path = prepare()
+    print('タップ領域:')
+    for label, dest, (x, y, w, h) in TILES:
+        print('  %-10s (%4d,%4d) %4d×%4d  -> %s' % (label, x, y, w, h, dest))
     if '--upload' not in sys.argv:
-        print('LINEへ登録するには --upload を付けて実行してください。')
+        print('\nLINEへ登録するには --upload を付けて実行してください。')
         return
-    print('登録しました。richMenuId =', upload(path, read_token()))
+    print('\n登録しました。richMenuId =', upload(path, read_token()))
     print('既定のリッチメニューに設定しました。')
 
 
