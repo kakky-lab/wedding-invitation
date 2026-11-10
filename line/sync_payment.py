@@ -20,8 +20,10 @@ OUT = os.path.join(HERE, 'payment.json')
 SS = '10QQrOyDKassdp7K3qd7ewaxNORoqUj8ufDwUrDnmmj8'
 SALT = 'iseyama-2026-1122'
 
-COL = {'名前': 1, '回答名': 10, '披露宴': 12, 'お支払い': 14,
-       '照合キー': 18, '入金確認': 20, '入金メモ': 21}
+HEADER_ROW = 3
+# 見出しの先頭が一致する列を使う。列が増えても壊れないように名前で探す。
+WANT = ['名前', '回答名', '披露宴', 'お支払い', '照合キー', '入金確認', '入金メモ']
+COL = {}
 OLD, NEW = '髙﨑濱邊邉瀨齋藤栁冨', '高崎浜辺辺瀬斎藤柳富'
 
 
@@ -51,6 +53,24 @@ def key(name):
     if not n:
         return ''
     return hashlib.sha256((SALT + '|' + n).encode('utf-8')).hexdigest()[:12]
+
+
+def find_columns(gs):
+    """見出し行を読み、使う列の位置を名前から決める。B列は見出しが無いので名前扱い。"""
+    head = gs.get(SS, '招待リスト!A%d:AZ%d' % (HEADER_ROW, HEADER_ROW))
+    head = head[0] if head else []
+    COL['名前'] = 1
+    for want in WANT[1:]:
+        found = None
+        for i, text in enumerate(head):
+            if str(text).strip().startswith(want):
+                found = i
+                break
+        if found is None:
+            raise RuntimeError('招待リストに「%s」の列が見つかりません。'
+                               '見出しが変わっていないか確認してください。' % want)
+        COL[want] = found
+    return COL
 
 
 def cell(row, name):
@@ -118,6 +138,10 @@ def sheet_updated(gs):
 
 def main():
     import gs
+    find_columns(gs)
+    print('列の位置: ' + ' / '.join(
+        '%s=%s' % (k, chr(65 + COL[k]) if COL[k] < 26 else 'A' + chr(65 + COL[k] - 26))
+        for k in WANT))
     entries, people = collect(gs)
     done = sum(1 for _, s, _ in people if s == 1)
     wait = sum(1 for _, s, _ in people if s == 0)
