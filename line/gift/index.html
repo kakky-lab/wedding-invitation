@@ -246,7 +246,7 @@ footer .names{font-family:var(--serif-en);font-style:italic;font-size:1rem;
 
   function load() {
     if (table) { return Promise.resolve(table); }
-    return fetch('payment.json', { cache: 'no-store' }).then(function (r) {
+    return fetch('https://kakky-lab.github.io/wedding-invitation/line/payment.json', { cache: 'no-store' }).then(function (r) {
       if (!r.ok) { throw new Error('status ' + r.status); }
       return r.json();
     }).then(function (j) { table = j.entries || {}; return table; });

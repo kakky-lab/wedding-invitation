@@ -371,7 +371,7 @@ LOOKUP_JS = """<script>
 
   function load() {
     if (table) { return Promise.resolve(table); }
-    return fetch('payment.json', { cache: 'no-store' }).then(function (r) {
+    return fetch(__DATA__, { cache: 'no-store' }).then(function (r) {
       if (!r.ok) { throw new Error('status ' + r.status); }
       return r.json();
     }).then(function (j) { table = j.entries || {}; return table; });
@@ -398,6 +398,7 @@ LOOKUP_JS = """<script>
 </script>"""
 
 LOOKUP_JS = (LOOKUP_JS
+             .replace('__DATA__', "'" + BASE + "payment.json'")
              .replace('__SALT__', js_str(SALT))
              .replace('__OLD__', js_str(OLD_KANJI))
              .replace('__NEW__', js_str(NEW_KANJI))
