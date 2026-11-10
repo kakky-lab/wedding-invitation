@@ -102,6 +102,20 @@ def collect(gs):
     return entries, people
 
 
+def sheet_updated(gs):
+    """スプレッドシートが最後に更新された日時を日本時間で返す。"""
+    import datetime
+    url = ('https://www.googleapis.com/drive/v3/files/%s?fields=modifiedTime' % SS)
+    try:
+        raw = gs._call('GET', url)['modifiedTime']
+    except Exception as exc:
+        print('  更新日時を取れませんでした:', exc, file=sys.stderr)
+        return None
+    utc = datetime.datetime.strptime(raw[:19], '%Y-%m-%dT%H:%M:%S')
+    jst = utc + datetime.timedelta(hours=9)
+    return jst
+
+
 def main():
     import gs
     entries, people = collect(gs)
@@ -119,8 +133,13 @@ def main():
     if '--dry' in sys.argv:
         print('\n--dry のため書き出していません。')
         return
+    jst = sheet_updated(gs)
     body = {'updated': __import__('datetime').date.today().isoformat(),
+            'asof': '%d年%d月%d日 %d:%02d' % (jst.year, jst.month, jst.day, jst.hour, jst.minute)
+                    if jst else '',
             'entries': entries}
+    if jst:
+        print('名簿の更新: %s' % body['asof'])
     with open(OUT, 'w', encoding='utf-8') as fh:
         json.dump(body, fh, ensure_ascii=False, separators=(',', ':'))
     print('\n書き出しました: line/payment.json')

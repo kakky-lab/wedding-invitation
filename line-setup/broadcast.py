@@ -118,6 +118,35 @@ def push(user_ids, text, tok):
         raise RuntimeError('配信に失敗: %s %s' % (err.code, err.read().decode()[:400]))
 
 
+def push_all(text, tok):
+    """友だち全員へ送る。名前が未照合の方にも届くので、全員向けはこちらを使う。"""
+    body = {'messages': [{'type': 'text', 'text': text[:4900]}]}
+    req = urllib.request.Request(
+        'https://api.line.me/v2/bot/message/broadcast',
+        data=json.dumps(body).encode(), method='POST',
+        headers={'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json'})
+    try:
+        urllib.request.urlopen(req)
+    except urllib.error.HTTPError as err:
+        raise RuntimeError('配信に失敗: %s %s' % (err.code, err.read().decode()[:400]))
+
+
+def followers(tok):
+    """友だちの数。LINEの集計は前日ぶんまでなので、さかのぼって探す。"""
+    import datetime
+    for back in (1, 2, 3):
+        day = (datetime.date.today() - datetime.timedelta(days=back)).strftime('%Y%m%d')
+        url = 'https://api.line.me/v2/bot/insight/followers?date=' + day
+        req = urllib.request.Request(url, headers={'Authorization': 'Bearer ' + tok})
+        try:
+            data = json.load(urllib.request.urlopen(req))
+        except urllib.error.HTTPError:
+            continue
+        if data.get('status') == 'ready':
+            return data.get('followers')
+    return None
+
+
 def show(key, item, people):
     print('=' * 56)
     print('台本: %s   送信予定日: %s   宛先: %s' % (key, item.get('send_on', '-'), item['target']))
@@ -142,18 +171,37 @@ def main():
     if key not in plan:
         raise RuntimeError('その台本はありません: %s（--list で確認）' % key)
     item = plan[key]
-    people = recipients(item['target'])
-    show(key, item, people)
+    if item['target'] == '-':
+        raise RuntimeError(
+            '%s は配信用ではありません。LINE公式アカウントマネージャーの'
+            'あいさつメッセージに貼ってください。' % key)
+    whole = item['target'] == 'all'
+    people = [] if whole else recipients(item['target'])
+    if whole:
+        tok = read_token()
+        num = followers(tok)
+        print('=' * 56)
+        print('台本: %s   送信予定日: %s   宛先: 友だち全員' % (key, item.get('send_on', '-')))
+        print('友だちの数: %s' % ('%d名（LINEの集計は前日ぶん）' % num if num is not None else '取得できませんでした'))
+        print('-' * 56)
+        print(item['text'])
+        print('=' * 56)
+    else:
+        show(key, item, people)
 
     if PLACEHOLDER in item['text']:
         print('⚠️ 本文に未記入の【ここに…】が残っています。messages.json を埋めてください。')
-    if not people:
+    if not whole and not people:
         print('⚠️ 宛先が0名です。まだ誰も友だち追加していないか、名前の登録が済んでいません。')
     if '--send' not in flags:
         print('※ 送信していません。実際に送るには --send を付けてください。')
         return
     if PLACEHOLDER in item['text']:
         raise RuntimeError('未記入の箇所があるため送信を中止しました。')
+    if whole:
+        push_all(item['text'], read_token())
+        print('✅ 友だち全員へ送信しました。')
+        return
     push([u for u, _ in people], item['text'], read_token())
     print('✅ %d 名へ送信しました。' % len(people))
 

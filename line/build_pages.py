@@ -11,6 +11,8 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 BASE = 'https://kakky-lab.github.io/wedding-invitation/line/'
+ALBUM = ('https://www.weddingshare.me/weddings/an40deq9tzz7x6sz/'
+         'UUT8Wd8jzhvbOCqGVkLdujfRGHOno7JU?openExternalBrowser=1&amp;type=link')
 
 NAV = [
     ('seat', 'お席', 'お席の確認'),
@@ -110,6 +112,8 @@ footer .names{font-family:var(--serif-en);font-style:italic;font-size:1rem;
 .chk .out.wait{background:#fffaf0;border:1px solid #e6cf9a}
 .chk .out.wait b{color:#9a7b2f}
 .chk .out.none{background:#f7f9f9;border:1px solid var(--tiffany-mist)}
+.chk .out .asof{display:block;margin-top:.55rem;padding-top:.5rem;font-size:.76rem;
+ color:var(--sub);border-top:1px dotted rgba(92,124,121,.35)}
 @media (max-width:360px){.btn{min-width:100%}.more ul{grid-template-columns:1fr}
  .chk .row{flex-wrap:wrap}.chk button{width:100%}}"""
 
@@ -243,20 +247,33 @@ PAGES['gift'] = """<p class="lead">当日の受付でも、事前のお振込で
 </div>"""
 
 PAGES['photo'] = """<p class="lead">当日撮っていただいた写真や動画を、ぜひ分けてください。</p>
-<div class="card">
-  <h3>共有アルバム</h3>
-  <p>当日までにこちらでご案内します。準備ができ次第、このLINEからお知らせします。</p>
-  <ul>
-    <li>スマートフォンからそのままアップロードできます</li>
-    <li>動画もそのままお送りいただけます</li>
-    <li>後日、二人からもアルバムを共有させてください</li>
-  </ul>
+<div class="hero">
+  <p class="big">共有アルバムができました</p>
+  <p style="font-size:.88rem;color:var(--sub)">
+    下のボタンから、写真も動画もそのままアップロードできます。<br>
+    みなさんが載せてくださったものも、同じ場所でご覧いただけます。
+  </p>
+  <div class="btn-row">
+    <a class="btn fill" href="ALBUM_URL" target="_blank" rel="noopener">写真・動画をアップロードする</a>
+    <a class="btn" href="ALBUM_URL" target="_blank" rel="noopener">みんなの写真を見る</a>
+  </div>
 </div>
 <div class="card">
-  <h3>お願い</h3>
+  <h3>使い方</h3>
+  <ul>
+    <li>アプリのインストールやログインは要りません</li>
+    <li>スマートフォンのカメラロールからそのまま選べます</li>
+    <li>動画もお送りいただけます</li>
+    <li>枚数に制限はありません。何枚でも大歓迎です</li>
+  </ul>
+  <p class="note">挙式前・当日・二次会、いつのお写真でも構いません。じゃんじゃんお待ちしています。</p>
+</div>
+<div class="card">
+  <h3>撮影のお願い</h3>
   <ul>
     <li>挙式中の撮影は、式の進行の妨げにならない範囲でお願いします</li>
-    <li>フラッシュとシャッター音にご配慮いただけると助かります</li>
+    <li>フラッシュとシャッター音にご配慮いただけますと助かります</li>
+    <li>後日、二人からもプロの写真を共有させてください</li>
   </ul>
 </div>"""
 
@@ -308,6 +325,7 @@ LOOKUP_JS = """<script>
   var NEW = __NEW__;
   var SUF = [__SUF__];
   var table = null;
+  var asof = '';
 
   function norm(raw) {
     var v = String(raw || ''), o = '', depth = 0, i, ch;
@@ -348,11 +366,20 @@ LOOKUP_JS = """<script>
     if (note) { out.querySelector('small').textContent = note; }
   }
 
+  function stamp() {
+    if (!asof) { return; }
+    var p = document.createElement('small');
+    p.className = 'asof';
+    p.textContent = '\u203b ' + asof + ' \u6642\u70b9\u306e\u60c5\u5831\u3067\u3059';
+    out.appendChild(p);
+  }
+
   function render(rec) {
     if (!rec) {
       show('none', '\u304a\u540d\u524d\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f',
         '\u6f22\u5b57\u306e\u30d5\u30eb\u30cd\u30fc\u30e0\u3067\u3082\u3046\u4e00\u5ea6\u304a\u8a66\u3057\u304f\u3060\u3055\u3044\u3002',
         '\u65e7\u59d3\u3084\u304a\u547c\u3073\u540d\u3067\u306f\u51fa\u306a\u3044\u3053\u3068\u304c\u3042\u308a\u307e\u3059\u3002\u304a\u624b\u6570\u3067\u3059\u304cLINE\u306e\u30c8\u30fc\u30af\u3078\u304a\u540d\u524d\u3092\u304a\u9001\u308a\u304f\u3060\u3055\u3044\u3002');
+      stamp();
       return;
     }
     if (rec.s === 1) {
@@ -367,6 +394,7 @@ LOOKUP_JS = """<script>
       show('none', '\u5f53\u65e5\u53d7\u4ed8\u3067\u304a\u9810\u304b\u308a\u3057\u307e\u3059',
         '\u4e8b\u524d\u306e\u304a\u632f\u8fbc\u307f\u306f\u627f\u3063\u3066\u304a\u308a\u307e\u305b\u3093\u3002\u304a\u6c17\u6301\u3061\u3060\u3051\u3067\u5341\u5206\u3067\u3059\u3002');
     }
+    stamp();
   }
 
   function load() {
@@ -374,7 +402,11 @@ LOOKUP_JS = """<script>
     return fetch(__DATA__, { cache: 'no-store' }).then(function (r) {
       if (!r.ok) { throw new Error('status ' + r.status); }
       return r.json();
-    }).then(function (j) { table = j.entries || {}; return table; });
+    }).then(function (j) {
+      asof = j.asof || '';
+      table = j.entries || {};
+      return table;
+    });
   }
 
   function run() {
@@ -493,6 +525,7 @@ def main():
     written = []
     for key, _, title in NAV:
         body = PAGES[key].replace('GIFT_URL', BASE + 'gift/')
+        body = body.replace('ALBUM_URL', ALBUM)
         size = write(os.path.join(HERE, key, 'index.html'), build_page(key, title, body))
         written.append(('line/%s/index.html' % key, size))
     written.append(('line/index.html', write(os.path.join(HERE, 'index.html'), build_index())))

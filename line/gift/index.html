@@ -98,6 +98,8 @@ footer .names{font-family:var(--serif-en);font-style:italic;font-size:1rem;
 .chk .out.wait{background:#fffaf0;border:1px solid #e6cf9a}
 .chk .out.wait b{color:#9a7b2f}
 .chk .out.none{background:#f7f9f9;border:1px solid var(--tiffany-mist)}
+.chk .out .asof{display:block;margin-top:.55rem;padding-top:.5rem;font-size:.76rem;
+ color:var(--sub);border-top:1px dotted rgba(92,124,121,.35)}
 @media (max-width:360px){.btn{min-width:100%}.more ul{grid-template-columns:1fr}
  .chk .row{flex-wrap:wrap}.chk button{width:100%}}</style>
 </head>
@@ -183,6 +185,7 @@ footer .names{font-family:var(--serif-en);font-style:italic;font-size:1rem;
   var NEW = '\u9ad8\u5d0e\u6d5c\u8fba\u8fba\u702c\u658e\u85e4\u67f3\u5bcc';
   var SUF = ['\u69d8', '\u3055\u307e', '\u3055\u3093', '\u304f\u3093', '\u541b', '\u3061\u3083\u3093', '\u6c0f'];
   var table = null;
+  var asof = '';
 
   function norm(raw) {
     var v = String(raw || ''), o = '', depth = 0, i, ch;
@@ -223,11 +226,20 @@ footer .names{font-family:var(--serif-en);font-style:italic;font-size:1rem;
     if (note) { out.querySelector('small').textContent = note; }
   }
 
+  function stamp() {
+    if (!asof) { return; }
+    var p = document.createElement('small');
+    p.className = 'asof';
+    p.textContent = '※ ' + asof + ' 時点の情報です';
+    out.appendChild(p);
+  }
+
   function render(rec) {
     if (!rec) {
       show('none', 'お名前が見つかりませんでした',
         '漢字のフルネームでもう一度お試しください。',
         '旧姓やお呼び名では出ないことがあります。お手数ですがLINEのトークへお名前をお送りください。');
+      stamp();
       return;
     }
     if (rec.s === 1) {
@@ -242,6 +254,7 @@ footer .names{font-family:var(--serif-en);font-style:italic;font-size:1rem;
       show('none', '当日受付でお預かりします',
         '事前のお振込みは承っておりません。お気持ちだけで十分です。');
     }
+    stamp();
   }
 
   function load() {
@@ -249,7 +262,11 @@ footer .names{font-family:var(--serif-en);font-style:italic;font-size:1rem;
     return fetch('https://kakky-lab.github.io/wedding-invitation/line/payment.json', { cache: 'no-store' }).then(function (r) {
       if (!r.ok) { throw new Error('status ' + r.status); }
       return r.json();
-    }).then(function (j) { table = j.entries || {}; return table; });
+    }).then(function (j) {
+      asof = j.asof || '';
+      table = j.entries || {};
+      return table;
+    });
   }
 
   function run() {
