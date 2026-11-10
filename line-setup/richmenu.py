@@ -29,12 +29,17 @@ HUB = 'https://kakky-lab.github.io/wedding-invitation/line/'
 
 # 絵柄の枠を実測した位置に合わせ、すき間も取りこぼさないよう広げてある。
 # 上段のまん中は見出し（WEDDING RECEPTION）なので、押しても何も起きない。
+#
+# 動作は2種類。
+#   ('uri', パス) … そのページを開く
+#   ('msg', 文字) … その文字をトークへ送る。LINE側の「応答メッセージ」が
+#                   同じキーワードに画像で返す（Webhookは要らない）
 TILES = [
-    ('スケジュール', 'schedule/', (0, 0, 865, 835)),
-    ('アクセス', 'access/', (1633, 0, 867, 835)),
-    ('席次表', 'seat/', (0, 835, 865, 851)),
-    ('御祝儀・お振込状況', 'gift/', (865, 835, 768, 851)),
-    ('写真＆動画共有', 'photo/', (1633, 835, 867, 851)),
+    ('スケジュール', ('msg', 'スケジュール'), (0, 0, 865, 835)),
+    ('アクセス', ('uri', 'access/'), (1633, 0, 867, 835)),
+    ('席次表', ('msg', '席次表'), (0, 835, 865, 851)),
+    ('御祝儀・お振込状況', ('uri', 'gift/'), (865, 835, 768, 851)),
+    ('写真＆動画共有', ('uri', 'photo/'), (1633, 835, 867, 851)),
 ]
 
 
@@ -75,12 +80,15 @@ def prepare():
 
 
 def menu_body():
-    """タップ領域の定義。URLを開くだけなのでWebhookが無くても動く。"""
+    """タップ領域の定義。どちらの動作もWebhookが無くても動く。"""
     areas = []
-    for label, path, (x, y, w, h) in TILES:
+    for label, (kind, value), (x, y, w, h) in TILES:
+        action = ({'type': 'uri', 'label': label[:20], 'uri': HUB + value}
+                  if kind == 'uri'
+                  else {'type': 'message', 'label': label[:20], 'text': value})
         areas.append({
             'bounds': {'x': x, 'y': y, 'width': w, 'height': h},
-            'action': {'type': 'uri', 'label': label[:20], 'uri': HUB + path},
+            'action': action,
         })
     return {'size': {'width': W, 'height': H}, 'selected': True,
             'name': '結婚式ゲスト用メニュー', 'chatBarText': 'メニュー', 'areas': areas}
@@ -133,8 +141,9 @@ def upload(path, token):
 def main():
     path = prepare()
     print('タップ領域:')
-    for label, dest, (x, y, w, h) in TILES:
-        print('  %-10s (%4d,%4d) %4d×%4d  -> %s' % (label, x, y, w, h, dest))
+    for label, (kind, value), (x, y, w, h) in TILES:
+        how = 'ページを開く' if kind == 'uri' else '画像が返る（応答メッセージ）'
+        print('  %-10s (%4d,%4d) %4d×%4d  %s: %s' % (label, x, y, w, h, how, value))
     if '--upload' not in sys.argv:
         print('\nLINEへ登録するには --upload を付けて実行してください。')
         return
