@@ -90,12 +90,17 @@ def aliases(gs):
 
 
 def status_of(row):
-    """0=事前振込（未確認） 1=事前振込（確認済） 2=当日受付。対象外は None。"""
+    """0=事前振込（未確認） 1=入金確認済 2=当日受付。対象外は None。
+
+    お支払い方法が未選択のままお振込みくださる方がいるので、
+    入金確認にチェックが入っていれば方法によらず「確認済」にする。"""
     if cell(row, '披露宴') == '欠席':
         return None
+    if cell(row, '入金確認').upper() == 'TRUE':
+        return 1
     if cell(row, 'お支払い') != '事前振込':
         return 2
-    return 1 if cell(row, '入金確認').upper() == 'TRUE' else 0
+    return 0
 
 
 def collect(gs):
