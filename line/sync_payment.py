@@ -105,7 +105,7 @@ def status_of(row):
 
 def collect(gs):
     """招待リストと別名シートから、ハッシュと状況の対応表を作る。"""
-    rows = gs.get(SS, '招待リスト!A4:V80')
+    rows = gs.get(SS, '招待リスト!A4:W80')
     alias = aliases(gs)
     entries, people = {}, []
     for row in rows:
