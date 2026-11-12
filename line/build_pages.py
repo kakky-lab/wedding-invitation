@@ -218,7 +218,7 @@ PAGES['access'] = """<p class="lead">伊勢山ヒルズ／〒220-0031 神奈川�
 
 PAGES['gift'] = """<p class="lead">当日の受付でも、事前のお振込でもお受けしています。</p>
 <div class="card bank">
-  <strong class="deadline">事前にお振込の場合は 11月13日（金）中まで</strong>
+  <strong class="deadline">事前にお振込の場合は 11月16日（月）中まで</strong>
   <dl>
     <dt>銀行名</dt><dd>みずほ銀行</dd>
     <dt>支店名</dt><dd>本郷支店（075）</dd>
@@ -277,7 +277,7 @@ PAGES['faq'] = """<p class="lead">迷われたときはお気軽にLINEでお尋
 <details><summary>服装はどうしたらよいですか</summary>
   <div class="body">挙式・披露宴にふさわしい服装でお越しください。男性はスーツ、女性はワンピースやセットアップなどが一般的です。11月下旬の横浜は冷えますので、羽織るものがあると安心です。会場内にクロークがございます。</div></details>
 <details><summary>ご祝儀はどうすればよいですか</summary>
-  <div class="body">当日受付でお預かりしています。事前のお振込をご希望の場合は <strong>11月13日（金）中まで</strong>に、<a href="GIFT_URL">こちらの口座</a>へお願いいたします。お気持ちだけで十分ですので、ご無理のないようにお願いいたします。</div></details>
+  <div class="body">当日受付でお預かりしています。事前のお振込をご希望の場合は <strong>11月16日（月）中まで</strong>に、<a href="GIFT_URL">こちらの口座</a>へお願いいたします。お気持ちだけで十分ですので、ご無理のないようにお願いいたします。</div></details>
 <details><summary>当日ヘアセットをしたいのですが</summary>
   <div class="body">会場近く（桜木町・みなとみらい周辺）の美容室をご案内できます。LINEのトークに「ヘアセット」とお送りください。式場内の美容室もご予約可能ですので、ご希望の方はお早めにお知らせください。</div></details>
 <details><summary>着替える場所はありますか</summary>
@@ -384,7 +384,7 @@ LOOKUP_JS = """<script>
         + (rec.d ? '\uff08' + rec.d + '\uff09' : ''));
     } else if (rec.s === 0) {
       show('wait', '\u307e\u3060\u78ba\u8a8d\u3067\u304d\u3066\u304a\u308a\u307e\u305b\u3093',
-        '\u4e8b\u524d\u632f\u8fbc\u3067\u627f\u3063\u3066\u304a\u308a\u307e\u3059\u3002\u671f\u65e5\u306f 11\u670813\u65e5\uff08\u91d1\uff09\u4e2d\u307e\u3067\u3067\u3059\u3002',
+        '\u4e8b\u524d\u632f\u8fbc\u3067\u627f\u3063\u3066\u304a\u308a\u307e\u3059\u3002\u671f\u65e5\u306f 11\u670816\u65e5\uff08\u6708\uff09\u4e2d\u307e\u3067\u3067\u3059\u3002',
         '\u304a\u632f\u8fbc\u307f\u6e08\u307f\u306e\u5834\u5408\u306f\u884c\u304d\u9055\u3044\u304b\u3082\u3057\u308c\u307e\u305b\u3093\u3002\u6570\u65e5\u304a\u3044\u3066\u3082\u3046\u4e00\u5ea6\u3054\u78ba\u8a8d\u304f\u3060\u3055\u3044\u3002');
     } else {
       show('none', '\u5f53\u65e5\u53d7\u4ed8\u3067\u304a\u9810\u304b\u308a\u3057\u307e\u3059',
